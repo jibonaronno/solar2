@@ -16,13 +16,13 @@
   *
   ******************************************************************************
   */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -46,9 +46,12 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+
+UART_HandleTypeDef *huart;
 
 /* USER CODE END PV */
 
@@ -57,6 +60,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_UART5_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -65,6 +69,7 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 uint8_t flag_uart1_rx = 0;
+uint8_t flag_uart5_rx = 0;
 
 int systick_clock_01 = 0;
 uint8_t flag_systick_01 = 0;
@@ -72,8 +77,9 @@ char rx1buff[10];
 char Rx1buff[100];
 char rx1buffindex = 0;
 
-char rx2buff[200];
-char rx2buffindex = 0;
+char rx5buff[10];
+char Rx5buff[100];
+char rx5buffindex = 0;
 
 struct __FILE
 {
@@ -94,7 +100,7 @@ PUTCHAR_PROTOTYPE
 {
   /* Place your implementation of fputc here */
   /* e.g. write a character to the USART */
-  HAL_UART_Transmit(&huart1, (uint8_t*) &ch, 1, 0x0fff);
+  HAL_UART_Transmit(huart, (uint8_t*) &ch, 1, 0x0fff);
   /* Loop until the end of transmission */
   //while (USART_GetFlagStatus(Port_USART, USART_FLAG_TC) == RESET)
   //{}
@@ -135,11 +141,15 @@ int main(void)
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_USART1_UART_Init();
+  MX_UART5_Init();
   /* USER CODE BEGIN 2 */
 	
+	huart = &huart1;
 	printf("Starting Code ... ");
 	
 	HAL_UART_Receive_IT(&huart1, (uint8_t *)rx1buff, 1);
+	
+	HAL_UART_Receive_IT(&huart5, (uint8_t *)rx5buff, 1);
 
   /* USER CODE END 2 */
 
@@ -155,10 +165,19 @@ int main(void)
 		}
 		
 		
+		if(flag_uart5_rx == 1)
+		{
+			flag_uart5_rx = 0;
+			huart = &huart1;
+			printf("%s - Received @ U5\n", Rx5buff);
+			rx5buffindex = 0;
+		}
+		
 		if(flag_uart1_rx == 1)
 		{
 			flag_uart1_rx = 0;
-			printf("%s - Received\n", Rx1buff);
+			huart = &huart5;
+			printf("%s - Received @ U1\n", Rx1buff);
 			rx1buffindex = 0;
 		}
 		
@@ -264,6 +283,39 @@ static void MX_ADC1_Init(void)
 }
 
 /**
+  * @brief UART5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_UART5_Init(void)
+{
+
+  /* USER CODE BEGIN UART5_Init 0 */
+
+  /* USER CODE END UART5_Init 0 */
+
+  /* USER CODE BEGIN UART5_Init 1 */
+
+  /* USER CODE END UART5_Init 1 */
+  huart5.Instance = UART5;
+  huart5.Init.BaudRate = 9600;
+  huart5.Init.WordLength = UART_WORDLENGTH_8B;
+  huart5.Init.StopBits = UART_STOPBITS_1;
+  huart5.Init.Parity = UART_PARITY_NONE;
+  huart5.Init.Mode = UART_MODE_TX_RX;
+  huart5.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart5.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN UART5_Init 2 */
+
+  /* USER CODE END UART5_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -337,6 +389,20 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		if(rx1buff[0] == 10)
 		{
 			flag_uart1_rx = 1;
+		}
+	}
+	
+	if(huart->Instance == UART5)
+	{
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+		rx5buff[1] = 0;
+		Rx5buff[rx5buffindex] = rx5buff[0];
+		rx5buffindex++;
+		Rx5buff[rx5buffindex] = 0;
+		HAL_UART_Receive_IT(&huart5, (uint8_t *)rx5buff, 1);
+		if(rx5buff[0] == 10)
+		{
+			flag_uart5_rx = 1;
 		}
 	}
 }

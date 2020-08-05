@@ -1,4 +1,7 @@
 solar2\main.o: ../Src/main.c
+solar2\main.o: C:\Keil_v5\ARM\ARMCC_505u2\Bin\..\include\stdio.h
+solar2\main.o: C:\Keil_v5\ARM\ARMCC_505u2\Bin\..\include\stdlib.h
+solar2\main.o: C:\Keil_v5\ARM\ARMCC_505u2\Bin\..\include\string.h
 solar2\main.o: ../Inc/main.h
 solar2\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 solar2\main.o: ../Inc/stm32f1xx_hal_conf.h
@@ -27,6 +30,3 @@ solar2\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h
 solar2\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h
 solar2\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
 solar2\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-solar2\main.o: C:\Keil_v5\ARM\ARMCC_505u2\Bin\..\include\stdio.h
-solar2\main.o: C:\Keil_v5\ARM\ARMCC_505u2\Bin\..\include\stdlib.h
-solar2\main.o: C:\Keil_v5\ARM\ARMCC_505u2\Bin\..\include\string.h
