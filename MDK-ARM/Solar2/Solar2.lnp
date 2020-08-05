@@ -1,0 +1,26 @@
+--cpu Cortex-M3
+"solar2\startup_stm32f107xc.o"
+"solar2\main.o"
+"solar2\stm32f1xx_it.o"
+"solar2\stm32f1xx_hal_msp.o"
+"solar2\stm32f1xx_hal_gpio_ex.o"
+"solar2\stm32f1xx_hal_adc.o"
+"solar2\stm32f1xx_hal_adc_ex.o"
+"solar2\stm32f1xx_hal.o"
+"solar2\stm32f1xx_hal_rcc.o"
+"solar2\stm32f1xx_hal_rcc_ex.o"
+"solar2\stm32f1xx_hal_gpio.o"
+"solar2\stm32f1xx_hal_dma.o"
+"solar2\stm32f1xx_hal_cortex.o"
+"solar2\stm32f1xx_hal_pwr.o"
+"solar2\stm32f1xx_hal_flash.o"
+"solar2\stm32f1xx_hal_flash_ex.o"
+"solar2\stm32f1xx_hal_exti.o"
+"solar2\stm32f1xx_hal_tim.o"
+"solar2\stm32f1xx_hal_tim_ex.o"
+"solar2\stm32f1xx_hal_uart.o"
+"solar2\system_stm32f1xx.o"
+--library_type=microlib --strict --scatter "Solar2\Solar2.sct"
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "Solar2.map" -o Solar2\Solar2.axf
