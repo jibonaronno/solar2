@@ -46,6 +46,7 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart1;
 
@@ -60,6 +61,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_UART4_Init(void);
 static void MX_UART5_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -70,6 +72,10 @@ static void MX_UART5_Init(void);
 
 uint8_t flag_uart1_rx = 0;
 uint8_t flag_uart5_rx = 0;
+uint8_t flag_uart4_rx = 0;
+
+uint32_t uart1_drip_counter = 0;
+uint32_t uart4_drip_counter = 0;
 
 int systick_clock_01 = 0;
 uint8_t flag_systick_01 = 0;
@@ -80,6 +86,10 @@ char rx1buffindex = 0;
 char rx5buff[10];
 char Rx5buff[100];
 char rx5buffindex = 0;
+
+char rx4buff[10];
+char Rx4buff[100];
+char rx4buffindex = 0;
 
 struct __FILE
 {
@@ -141,6 +151,7 @@ int main(void)
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_USART1_UART_Init();
+  MX_UART4_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
 	
@@ -149,7 +160,9 @@ int main(void)
 	
 	HAL_UART_Receive_IT(&huart1, (uint8_t *)rx1buff, 1);
 	
-	HAL_UART_Receive_IT(&huart5, (uint8_t *)rx5buff, 1);
+	//HAL_UART_Receive_IT(&huart5, (uint8_t *)rx5buff, 1);
+	
+	HAL_UART_Receive_IT(&huart4, (uint8_t *)rx4buff, 1);
 
   /* USER CODE END 2 */
 
@@ -164,20 +177,27 @@ int main(void)
 			//HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
 		}
 		
+		if(flag_uart4_rx == 1)
+		{
+			flag_uart4_rx = 0;
+			huart = &huart1;
+			printf("%s", Rx4buff);
+			rx4buffindex = 0;
+		}
 		
 		if(flag_uart5_rx == 1)
 		{
 			flag_uart5_rx = 0;
 			huart = &huart1;
-			printf("%s - Received @ U5\n", Rx5buff);
+			printf("%s", Rx5buff);
 			rx5buffindex = 0;
 		}
 		
 		if(flag_uart1_rx == 1)
 		{
 			flag_uart1_rx = 0;
-			huart = &huart5;
-			printf("%s - Received @ U1\n", Rx1buff);
+			huart = &huart4;
+			printf("%s", Rx1buff);
 			rx1buffindex = 0;
 		}
 		
@@ -283,6 +303,39 @@ static void MX_ADC1_Init(void)
 }
 
 /**
+  * @brief UART4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_UART4_Init(void)
+{
+
+  /* USER CODE BEGIN UART4_Init 0 */
+
+  /* USER CODE END UART4_Init 0 */
+
+  /* USER CODE BEGIN UART4_Init 1 */
+
+  /* USER CODE END UART4_Init 1 */
+  huart4.Instance = UART4;
+  huart4.Init.BaudRate = 9600;
+  huart4.Init.WordLength = UART_WORDLENGTH_8B;
+  huart4.Init.StopBits = UART_STOPBITS_1;
+  huart4.Init.Parity = UART_PARITY_NONE;
+  huart4.Init.Mode = UART_MODE_TX_RX;
+  huart4.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart4.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN UART4_Init 2 */
+
+  /* USER CODE END UART4_Init 2 */
+
+}
+
+/**
   * @brief UART5 Initialization Function
   * @param None
   * @retval None
@@ -298,7 +351,7 @@ static void MX_UART5_Init(void)
 
   /* USER CODE END UART5_Init 1 */
   huart5.Instance = UART5;
-  huart5.Init.BaudRate = 9600;
+  huart5.Init.BaudRate = 115200;
   huart5.Init.WordLength = UART_WORDLENGTH_8B;
   huart5.Init.StopBits = UART_STOPBITS_1;
   huart5.Init.Parity = UART_PARITY_NONE;
@@ -386,9 +439,41 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		rx1buffindex++;
 		Rx1buff[rx1buffindex] = 0;
 		HAL_UART_Receive_IT(&huart1, (uint8_t *)rx1buff, 1);
+		uart1_drip_counter = 35;
 		if(rx1buff[0] == 10)
 		{
-			flag_uart1_rx = 1;
+			if(rx1buffindex > 4)
+			{
+				flag_uart1_rx = 1;
+				uart1_drip_counter = 0;
+			}
+			else
+			{
+				rx1buffindex = 0;
+			}
+		}
+	}
+	
+	if(huart->Instance == UART4)
+	{
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+		rx4buff[1] = 0;
+		Rx4buff[rx4buffindex] = rx4buff[0];
+		rx4buffindex++;
+		Rx4buff[rx4buffindex] = 0;
+		HAL_UART_Receive_IT(&huart4, (uint8_t *)rx4buff, 1);
+		uart4_drip_counter = 35;
+		if(rx4buff[0] == 10)
+		{
+			if(rx4buffindex > 4)
+			{
+				flag_uart4_rx = 1;
+				uart4_drip_counter = 0;
+			}
+			else
+			{
+				rx4buffindex = 0;
+			}
 		}
 	}
 	
@@ -417,6 +502,25 @@ void HAL_SYSTICK_Callback(void)
 	{
 		flag_systick_01 = 1;
 	}
+	
+	if(uart1_drip_counter > 0)
+	{
+		if(uart1_drip_counter == 1)
+		{
+			flag_uart1_rx = 1;
+		}
+		uart1_drip_counter--;
+	}
+	
+	if(uart4_drip_counter > 0)
+	{
+		if(uart4_drip_counter == 1)
+		{
+			flag_uart4_rx = 1;
+		}
+		uart4_drip_counter--;
+	}
+	
 }
 
 /* USER CODE END 4 */
