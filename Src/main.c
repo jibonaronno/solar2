@@ -26,6 +26,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "atcommands.h"
+
+extern atcmd_t atcmdtable[];
 
 /* USER CODE END Includes */
 
@@ -49,6 +52,7 @@ ADC_HandleTypeDef hadc1;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
@@ -63,6 +67,7 @@ static void MX_ADC1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_UART4_Init(void);
 static void MX_UART5_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -70,9 +75,9 @@ static void MX_UART5_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-uint8_t flag_uart1_rx = 0;
-uint8_t flag_uart5_rx = 0;
-uint8_t flag_uart4_rx = 0;
+volatile uint8_t flag_uart1_rx = 0;
+volatile uint8_t flag_uart5_rx = 0;
+volatile uint8_t flag_uart4_rx = 0;
 
 uint32_t uart1_drip_counter = 0;
 uint32_t uart4_drip_counter = 0;
@@ -90,6 +95,13 @@ char rx5buffindex = 0;
 char rx4buff[10];
 char Rx4buff[100];
 char rx4buffindex = 0;
+
+volatile uint8_t flag_atcommand_responded = 0;
+volatile int at_timeout_counter = 0;
+volatile int atcmd_idx = 0;
+volatile uint8_t flag_ego = 0;
+
+unsigned char pData[] = {0x1A, 0x00};
 
 struct __FILE
 {
@@ -127,6 +139,10 @@ PUTCHAR_PROTOTYPE
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	
+	char *needle;
+	int lidx01 = 0;
+	char buf01[150];
 
   /* USER CODE END 1 */
   
@@ -153,6 +169,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_UART4_Init();
   MX_UART5_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 	
 	huart = &huart1;
@@ -163,6 +180,8 @@ int main(void)
 	//HAL_UART_Receive_IT(&huart5, (uint8_t *)rx5buff, 1);
 	
 	HAL_UART_Receive_IT(&huart4, (uint8_t *)rx4buff, 1);
+	
+	at_timeout_counter = 20000;
 
   /* USER CODE END 2 */
 
@@ -177,13 +196,122 @@ int main(void)
 			//HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
 		}
 		
+		//(flag_atcommand_responded == 1)
+		if(at_timeout_counter == 0)
+		{
+			if(flag_atcommand_responded == 1)
+			{
+				if(atcmd_idx < 15)
+				{
+					atcmd_idx++;
+					
+					if(strstr(atcmdtable[atcmd_idx].cmd, "^Z"))
+					{
+						//huart = &huart1;
+						//printf("SENDING CTRL+Z\r\n");
+						//HAL_Delay(500);
+						//huart = &huart4;
+						//printf("%c",0x1A);
+						//HAL_UART_Transmit(huart, pData, 1, 0);
+					}
+					else if(strlen(atcmdtable[atcmd_idx].cmd) > 0)
+					{
+						if(strstr(atcmdtable[atcmd_idx].ret, "^Z"))
+						{
+							//huart = &huart4;
+							lidx01 = strlen(atcmdtable[atcmd_idx].cmd);
+							strcpy(buf01, atcmdtable[atcmd_idx].cmd);
+							buf01[lidx01] = 0x1A;
+							buf01[lidx01+1] = 0;
+							lidx01++;
+							//printf("%s",atcmdtable[atcmd_idx].cmd);
+							HAL_UART_Transmit(&huart4, (unsigned char*)buf01, lidx01, 0x0fff);
+							HAL_Delay(1500);
+							huart = &huart1;
+							printf("SENDING DATA + CTRL+Z\r\n");
+						}
+						else
+						{
+							huart = &huart4;
+							printf("%s",atcmdtable[atcmd_idx].cmd);
+						}
+						
+						HAL_Delay(500);
+						huart = &huart1;
+						printf("%s -- %s\r\n",atcmdtable[atcmd_idx].cmd, atcmdtable[atcmd_idx].ret);
+						HAL_Delay(500);
+					}
+					flag_atcommand_responded = 0;
+					at_timeout_counter = atcmdtable[atcmd_idx].timeout * 1000;
+				}
+				else
+				{
+					if(atcmd_idx > 9)
+					{
+						atcmd_idx = 9;
+					}
+				}
+			}
+			else //if(flag_atcommand_responded != 0) and timeout happens.
+			{
+				if(atcmd_idx == 0) //Condition After Start
+				{
+					flag_atcommand_responded = 1;
+					atcmd_idx = -1;
+				}
+				else
+				{
+					if(flag_ego == 1)
+					{
+						flag_ego = 0;
+						flag_atcommand_responded = 1;
+					}
+					else
+					{
+						flag_atcommand_responded = 1;
+						atcmd_idx = 9;
+						at_timeout_counter = 20000;
+					}
+				}
+			}
+		}
+		
+		/****************************************************/
+		/* DATA CAME FROM MODEM															*/
+		/****************************************************/
 		if(flag_uart4_rx == 1)
 		{
 			flag_uart4_rx = 0;
+			
+			if(strstr(atcmdtable[atcmd_idx].ret, "__EGO"))
+			{
+				flag_ego = 1;
+			}
+			else if(strstr(atcmdtable[atcmd_idx].cmd, "CIPSTATUS") && strstr(Rx4buff, "ERROR"))
+			{
+				flag_atcommand_responded = 1;
+				at_timeout_counter = 2000;
+				atcmd_idx = -1;
+			}
+			else
+			{
+				needle = strstr(Rx4buff, atcmdtable[atcmd_idx].ret);
+				if(needle)
+				{
+					flag_atcommand_responded = 1;
+					if(at_timeout_counter > 1000)
+					{
+						at_timeout_counter = 1000;
+					}
+				}
+			}
+			
 			huart = &huart1;
 			printf("%s", Rx4buff);
 			rx4buffindex = 0;
 		}
+		
+		/*********************************************************/
 		
 		if(flag_uart5_rx == 1)
 		{
@@ -289,7 +417,7 @@ static void MX_ADC1_Init(void)
   }
   /** Configure Regular Channel 
   */
-  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Channel = ADC_CHANNEL_6;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -351,7 +479,7 @@ static void MX_UART5_Init(void)
 
   /* USER CODE END UART5_Init 1 */
   huart5.Instance = UART5;
-  huart5.Init.BaudRate = 115200;
+  huart5.Init.BaudRate = 9600;
   huart5.Init.WordLength = UART_WORDLENGTH_8B;
   huart5.Init.StopBits = UART_STOPBITS_1;
   huart5.Init.Parity = UART_PARITY_NONE;
@@ -398,6 +526,39 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 9600;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
 
 }
 
@@ -519,6 +680,14 @@ void HAL_SYSTICK_Callback(void)
 			flag_uart4_rx = 1;
 		}
 		uart4_drip_counter--;
+	}
+	
+	if(at_timeout_counter > 0)
+	{
+		if(at_timeout_counter == 1)
+		{
+		}
+		at_timeout_counter--;
 	}
 	
 }
