@@ -23,12 +23,14 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "modbusmaster.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "atcommands.h"
 
 extern atcmd_t atcmdtable[];
+extern MBUSPACDEF mbuspac[2];
 
 /* USER CODE END Includes */
 
@@ -76,32 +78,63 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 volatile uint8_t flag_uart1_rx = 0;
+volatile uint8_t flag_uart2_rx = 0;
 volatile uint8_t flag_uart5_rx = 0;
 volatile uint8_t flag_uart4_rx = 0;
 
 uint32_t uart1_drip_counter = 0;
+uint32_t uart2_drip_counter = 0;
 uint32_t uart4_drip_counter = 0;
+uint32_t uart5_drip_counter = 0;
 
 int systick_clock_01 = 0;
 uint8_t flag_systick_01 = 0;
-char rx1buff[10];
-char Rx1buff[100];
+char rx1buff[20];
+char Rx1buff[200];
 char rx1buffindex = 0;
 
-char rx5buff[10];
-char Rx5buff[100];
+char rx5buff[20];
+char Rx5buff[200];
 char rx5buffindex = 0;
 
-char rx4buff[10];
-char Rx4buff[100];
+char rx4buff[20];
+char Rx4buff[200];
 char rx4buffindex = 0;
+
+char rx2buff[20];
+char Rx2buff[200];
+char rx2buffindex = 0;
+char strSunspec[400];
+
+volatile int mb_timeout_counter = 3000; //modbus timeout counter
 
 volatile uint8_t flag_atcommand_responded = 0;
 volatile int at_timeout_counter = 0;
 volatile int atcmd_idx = 0;
 volatile uint8_t flag_ego = 0;
 
+int dckwhout = 10;
+int dcinob = 22;
+int dcoutob = 33;
+int ackwhsun = 44;
+int alarmsun = 2;
+int inpower = 1;
+int pv1volt = 330;
+int pv2volt = 330;
+int avolt = 220;
+int bvolt = 220;
+int cvolt = 230;
+int acur = 1;
+int bcur = 2;
+int ccur = 1;
+int alarm1 = 0;
+int alarm2 = 0;
+int alarm3 = 0;
+char strGet01[500];
+
 unsigned char pData[] = {0x1A, 0x00};
+
+int mbus_index = 0;
 
 struct __FILE
 {
@@ -130,6 +163,12 @@ PUTCHAR_PROTOTYPE
   return ch;
 }
 
+#define OPMODE_MODEM			1
+#define OPMODE_MODBUS			2
+#define OPMODE_OUTBACK		3
+
+IWDG_HandleTypeDef   IwdgHandle;
+
 /* USER CODE END 0 */
 
 /**
@@ -142,7 +181,9 @@ int main(void)
 	
 	char *needle;
 	int lidx01 = 0;
-	char buf01[150];
+	//char buf01[150];
+	
+	uint8_t flag_operation_mode = OPMODE_MODEM; //OPMODE_MODBUS;
 
   /* USER CODE END 1 */
   
@@ -153,6 +194,17 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+	
+	IwdgHandle.Instance = IWDG;
+
+  IwdgHandle.Init.Prescaler = IWDG_PRESCALER_128;
+  IwdgHandle.Init.Reload = 0x0AAA;
+	
+	if(HAL_IWDG_Init(&IwdgHandle) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
 
   /* USER CODE END Init */
 
@@ -173,9 +225,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	
 	huart = &huart1;
-	printf("Starting Code ... ");
+	printf("Starting Code ... \r\n");
 	
 	HAL_UART_Receive_IT(&huart1, (uint8_t *)rx1buff, 1);
+	
+	HAL_UART_Receive_IT(&huart2, (uint8_t *)rx2buff, 1);
 	
 	//HAL_UART_Receive_IT(&huart5, (uint8_t *)rx5buff, 1);
 	
@@ -194,86 +248,209 @@ int main(void)
 			systick_clock_01 = 0;
 			flag_systick_01 = 0;
 			//HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+			HAL_IWDG_Refresh(&IwdgHandle);
 		}
 		
-		//(flag_atcommand_responded == 1)
-		if(at_timeout_counter == 0)
+		if(flag_operation_mode == OPMODE_MODEM)
 		{
-			if(flag_atcommand_responded == 1)
+			//(flag_atcommand_responded == 1)
+			if(at_timeout_counter == 0)
 			{
-				if(atcmd_idx < 15)
+				if(flag_atcommand_responded == 1)
 				{
-					atcmd_idx++;
-					
-					if(strstr(atcmdtable[atcmd_idx].cmd, "^Z"))
+					if(atcmd_idx < 15)
 					{
-						//huart = &huart1;
-						//printf("SENDING CTRL+Z\r\n");
-						//HAL_Delay(500);
-						//huart = &huart4;
-						//printf("%c",0x1A);
-						//HAL_UART_Transmit(huart, pData, 1, 0);
-					}
-					else if(strlen(atcmdtable[atcmd_idx].cmd) > 0)
-					{
-						if(strstr(atcmdtable[atcmd_idx].ret, "^Z"))
-						{
-							//huart = &huart4;
-							lidx01 = strlen(atcmdtable[atcmd_idx].cmd);
-							strcpy(buf01, atcmdtable[atcmd_idx].cmd);
-							buf01[lidx01] = 0x1A;
-							buf01[lidx01+1] = 0;
-							lidx01++;
-							//printf("%s",atcmdtable[atcmd_idx].cmd);
-							HAL_UART_Transmit(&huart4, (unsigned char*)buf01, lidx01, 0x0fff);
-							HAL_Delay(1500);
-							huart = &huart1;
-							printf("SENDING DATA + CTRL+Z\r\n");
-						}
-						else
-						{
-							huart = &huart4;
-							printf("%s",atcmdtable[atcmd_idx].cmd);
-						}
+						atcmd_idx++;
 						
-						HAL_Delay(500);
-						huart = &huart1;
-						printf("%s -- %s\r\n",atcmdtable[atcmd_idx].cmd, atcmdtable[atcmd_idx].ret);
-						HAL_Delay(500);
-					}
-					flag_atcommand_responded = 0;
-					at_timeout_counter = atcmdtable[atcmd_idx].timeout * 1000;
-				}
-				else
-				{
-					if(atcmd_idx > 9)
-					{
-						atcmd_idx = 9;
-					}
-				}
-			}
-			else //if(flag_atcommand_responded != 0) and timeout happens.
-			{
-				if(atcmd_idx == 0) //Condition After Start
-				{
-					flag_atcommand_responded = 1;
-					atcmd_idx = -1;
-				}
-				else
-				{
-					if(flag_ego == 1)
-					{
-						flag_ego = 0;
-						flag_atcommand_responded = 1;
+						if(strstr(atcmdtable[atcmd_idx].cmd, "^Z"))
+						{
+							//huart = &huart1;
+							//printf("SENDING CTRL+Z\r\n");
+							//HAL_Delay(500);
+							//huart = &huart4;
+							//printf("%c",0x1A);
+							//HAL_UART_Transmit(huart, pData, 1, 0);
+						}
+						else if(strlen(atcmdtable[atcmd_idx].cmd) > 0)
+						{
+							if(strstr(atcmdtable[atcmd_idx].ret, "^Z"))
+							{
+								
+								/*********************************************************/
+								/*		GATHER OUTBACK AND SUN DATA 											**/
+								/*********************************************************/
+								//sprintf(strGet01, "%s", "GET /gateway/pinlog.php");
+								sprintf(strGet01, "%s?dckwhout=%d&dcinob=%d&dcoutob=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dckwhout, dcinob, dcoutob, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								lidx01 = strlen(strGet01);
+								strGet01[lidx01] = 0x1A;
+								lidx01++;
+								strGet01[lidx01] = 0;
+								
+								huart = &huart1;
+								printf("-->> %s", strGet01);
+								HAL_Delay(1500);
+
+								//huart = &huart4;
+								//lidx01 = strlen(atcmdtable[atcmd_idx].cmd);
+								//strcpy(buf01, atcmdtable[atcmd_idx].cmd);
+								//buf01[lidx01] = 0x1A;
+								//buf01[lidx01+1] = 0;
+								//lidx01++;
+								//printf("%s",atcmdtable[atcmd_idx].cmd);
+								HAL_UART_Transmit(&huart4, (unsigned char*)strGet01, lidx01, 0x0fff);
+								HAL_Delay(1500);
+								huart = &huart1;
+								printf("SENDING DATA + CTRL+Z\r\n");
+								
+								flag_operation_mode = OPMODE_MODBUS;
+							}
+							else
+							{
+								huart = &huart4;
+								printf("%s",atcmdtable[atcmd_idx].cmd);
+							}
+							
+							HAL_Delay(500);
+							huart = &huart1;
+							printf("%s -- %s\r\n",atcmdtable[atcmd_idx].cmd, atcmdtable[atcmd_idx].ret);
+							HAL_Delay(500);
+						}
+						flag_atcommand_responded = 0;
+						at_timeout_counter = atcmdtable[atcmd_idx].timeout * 1000;
 					}
 					else
 					{
+						if(atcmd_idx > 9)
+						{
+							atcmd_idx = 9;
+						}
+					}
+				}
+				else //if(flag_atcommand_responded != 0) and timeout happens.
+				{
+					if(atcmd_idx == 0) //Condition After Start
+					{
 						flag_atcommand_responded = 1;
-						atcmd_idx = 9;
-						at_timeout_counter = 20000;
+						atcmd_idx = -1;
+					}
+					else
+					{
+						if(flag_ego == 1)
+						{
+							flag_ego = 0;
+							flag_atcommand_responded = 1;
+						}
+						else
+						{
+							flag_atcommand_responded = 1;
+							atcmd_idx = 9;
+							at_timeout_counter = 20000;
+						}
 					}
 				}
 			}
+		}
+		else if(flag_operation_mode == OPMODE_MODBUS)
+		{
+			
+			if(mb_timeout_counter == 0)
+			{
+				
+				HAL_UART_Transmit_IT(&huart2, (uint8_t *)mbuspac[mbus_index].txdata, 8);
+				mb_timeout_counter = 3000;
+
+			}
+			
+				/****************************************************/
+				/* DATA CAME FROM SUNSPEC														*/
+				/****************************************************/
+				if(flag_uart2_rx == 1)
+				{
+					flag_uart2_rx = 0;
+					if(mbuspac[mbus_index].cmd == VOLT_PV1_CMD)
+					{
+						pv1volt = (Rx2buff[3] << 8)|(Rx2buff[4]);
+					}
+					
+					if(mbuspac[mbus_index].cmd == VOLT_PV2_CMD)
+					{
+						pv2volt = (Rx2buff[3] << 8)|(Rx2buff[4]);
+					}
+					
+					if(mbuspac[mbus_index].cmd == VOLT_A_CMD)
+					{
+						avolt = (Rx2buff[3] << 8)|(Rx2buff[4]);
+					}
+					
+					if(mbuspac[mbus_index].cmd == VOLT_B_CMD)
+					{
+						bvolt = (Rx2buff[3] << 8)|(Rx2buff[4]);
+					}
+					
+					if(mbuspac[mbus_index].cmd == VOLT_C_CMD)
+					{
+						cvolt = (Rx2buff[3] << 8)|(Rx2buff[4]);
+					}
+					
+					if(mbuspac[mbus_index].cmd == ALARM1_CMD)
+					{
+						alarm1 = (Rx2buff[3] << 8)|(Rx2buff[4]);
+					}
+					
+					if(mbuspac[mbus_index].cmd == ALARM2_CMD)
+					{
+						alarm2 = (Rx2buff[3] << 8)|(Rx2buff[4]);
+					}
+					
+					if(mbuspac[mbus_index].cmd == ALARM3_CMD)
+					{
+						alarm3 = (Rx2buff[3] << 8)|(Rx2buff[4]);
+					}
+					
+					if(mbuspac[mbus_index].cmd == CURR_A_CMD)
+					{
+						acur = (Rx2buff[3] << 24)|(Rx2buff[4] << 16) | (Rx2buff[5] << 8) | Rx2buff[6];
+					}
+					
+					if(mbuspac[mbus_index].cmd == CURR_B_CMD)
+					{
+						bcur = (Rx2buff[3] << 24)|(Rx2buff[4] << 16) | (Rx2buff[5] << 8) | Rx2buff[6];
+					}
+					
+					if(mbuspac[mbus_index].cmd == CURR_C_CMD)
+					{
+						ccur = (Rx2buff[3] << 24)|(Rx2buff[4] << 16) | (Rx2buff[5] << 8) | Rx2buff[6];
+					}
+					
+					if(mbuspac[mbus_index].cmd == APOWER_CMD)
+					{
+						ackwhsun = (Rx2buff[3] << 24)|(Rx2buff[4] << 16) | (Rx2buff[5] << 8) | Rx2buff[6];
+						sprintf(strSunspec, "PV1-%d PV2-%d Avolt-%d Bvolt-%d Cvolt-%d Acur-%d Bcur-%d Ccur-%d Alrm1-%d Alrm2-%d Alrm3-%d Activepower-%d", pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur, alarm1, alarm2, alarm3, ackwhsun);
+						
+						flag_operation_mode = OPMODE_MODEM;
+					}
+					
+					HAL_Delay(600);
+					//HAL_UART_Transmit(&huart1, (uint8_t *)strSunspec, strlen(strSunspec), 0x0FFF);
+					huart = &huart1;
+					printf("%d\r\n", mbus_index);
+					HAL_Delay(600);
+					//huart = &huart2;
+					//printf("%s", Rx2buff);
+					rx2buffindex = 0;
+					
+					if(mbus_index < 12)
+					{
+						/** INCREMENT MODBUS COMMAND INDEX **/
+						mbus_index++;
+					}
+					else
+					{
+						mbus_index = 0;
+						mb_timeout_counter = 3000;
+					}
+				}
+				/*****************************************************/
 		}
 		
 		/****************************************************/
@@ -292,6 +469,12 @@ int main(void)
 				flag_atcommand_responded = 1;
 				at_timeout_counter = 2000;
 				atcmd_idx = -1;
+			}
+			else if(strstr(atcmdtable[atcmd_idx].cmd, "CIPSTATUS") && strstr(Rx4buff, "TCP CLOSE"))
+			{
+				flag_atcommand_responded = 1;
+				at_timeout_counter = 2000;
+				atcmd_idx = 9;
 			}
 			else
 			{
@@ -313,6 +496,11 @@ int main(void)
 		
 		/*********************************************************/
 		
+		
+		
+		/****************************************************/
+		/* DATA CAME FROM OutBack														*/
+		/****************************************************/
 		if(flag_uart5_rx == 1)
 		{
 			flag_uart5_rx = 0;
@@ -321,6 +509,8 @@ int main(void)
 			rx5buffindex = 0;
 		}
 		
+		/*****************************************************/
+		
 		if(flag_uart1_rx == 1)
 		{
 			flag_uart1_rx = 0;
@@ -328,6 +518,7 @@ int main(void)
 			printf("%s", Rx1buff);
 			rx1buffindex = 0;
 		}
+		
 		
     /* USER CODE END WHILE */
 
@@ -590,6 +781,8 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1)
@@ -646,11 +839,32 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		rx5buffindex++;
 		Rx5buff[rx5buffindex] = 0;
 		HAL_UART_Receive_IT(&huart5, (uint8_t *)rx5buff, 1);
+		uart5_drip_counter = 50;
 		if(rx5buff[0] == 10)
 		{
-			flag_uart5_rx = 1;
+			//flag_uart5_rx = 1;
 		}
 	}
+	
+	if(huart->Instance == USART2)
+	{
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+		rx2buff[1] = 0;
+		Rx2buff[rx2buffindex] = rx2buff[0];
+		rx2buffindex++;
+		Rx2buff[rx2buffindex] = 0;
+		HAL_UART_Receive_IT(&huart2, (uint8_t *)rx2buff, 1);
+		uart2_drip_counter = 50;
+		if(rx2buff[0] == 10)
+		{
+			//flag_uart2_rx = 1;
+		}
+	}
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	
 }
 
 void HAL_SYSTICK_Callback(void)
@@ -673,6 +887,15 @@ void HAL_SYSTICK_Callback(void)
 		uart1_drip_counter--;
 	}
 	
+	if(uart2_drip_counter > 0)
+	{
+		if(uart2_drip_counter == 1)
+		{
+			flag_uart2_rx = 1;
+		}
+		uart2_drip_counter--;
+	}
+	
 	if(uart4_drip_counter > 0)
 	{
 		if(uart4_drip_counter == 1)
@@ -680,6 +903,20 @@ void HAL_SYSTICK_Callback(void)
 			flag_uart4_rx = 1;
 		}
 		uart4_drip_counter--;
+	}
+	
+	if(uart5_drip_counter > 0)
+	{
+		if(uart5_drip_counter == 1)
+		{
+			flag_uart5_rx = 1;
+		}
+		uart5_drip_counter--;
+	}
+	
+	if(mb_timeout_counter > 0)
+	{
+		mb_timeout_counter--;
 	}
 	
 	if(at_timeout_counter > 0)
