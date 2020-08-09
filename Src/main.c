@@ -77,6 +77,8 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+static void UX_GPIO_Init(void);
+
 volatile uint8_t flag_uart1_rx = 0;
 volatile uint8_t flag_uart2_rx = 0;
 volatile uint8_t flag_uart5_rx = 0;
@@ -107,6 +109,7 @@ char rx2buffindex = 0;
 char strSunspec[400];
 
 volatile int mb_timeout_counter = 3000; //modbus timeout counter
+volatile int mbus_cycle_count = 0;
 
 volatile uint8_t flag_atcommand_responded = 0;
 volatile int at_timeout_counter = 0;
@@ -131,6 +134,8 @@ int alarm1 = 0;
 int alarm2 = 0;
 int alarm3 = 0;
 char strGet01[500];
+
+int obcounter = 0;
 
 unsigned char pData[] = {0x1A, 0x00};
 
@@ -183,7 +188,7 @@ int main(void)
 	int lidx01 = 0;
 	//char buf01[150];
 	
-	uint8_t flag_operation_mode = OPMODE_MODEM; //OPMODE_MODBUS;
+	uint8_t flag_operation_mode = OPMODE_MODBUS;
 
   /* USER CODE END 1 */
   
@@ -224,6 +229,8 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 	
+	UX_GPIO_Init();
+	
 	huart = &huart1;
 	printf("Starting Code ... \r\n");
 	
@@ -231,7 +238,7 @@ int main(void)
 	
 	HAL_UART_Receive_IT(&huart2, (uint8_t *)rx2buff, 1);
 	
-	//HAL_UART_Receive_IT(&huart5, (uint8_t *)rx5buff, 1);
+	HAL_UART_Receive_IT(&huart5, (uint8_t *)rx5buff, 1);
 	
 	HAL_UART_Receive_IT(&huart4, (uint8_t *)rx4buff, 1);
 	
@@ -310,10 +317,10 @@ int main(void)
 								printf("%s",atcmdtable[atcmd_idx].cmd);
 							}
 							
-							HAL_Delay(500);
-							huart = &huart1;
-							printf("%s -- %s\r\n",atcmdtable[atcmd_idx].cmd, atcmdtable[atcmd_idx].ret);
-							HAL_Delay(500);
+							HAL_Delay(200);
+							//huart = &huart1;
+							//printf("%s -- %s\r\n",atcmdtable[atcmd_idx].cmd, atcmdtable[atcmd_idx].ret);
+							HAL_Delay(200);
 						}
 						flag_atcommand_responded = 0;
 						at_timeout_counter = atcmdtable[atcmd_idx].timeout * 1000;
@@ -357,8 +364,28 @@ int main(void)
 			{
 				
 				HAL_UART_Transmit_IT(&huart2, (uint8_t *)mbuspac[mbus_index].txdata, 8);
-				mb_timeout_counter = 3000;
-
+				HAL_Delay(200);
+				huart = &huart1;
+				printf("%d :: %02X %02X %02X %02X %02X %02X %02X %02X\r\n", mbus_index, mbuspac[mbus_index].txdata[0], mbuspac[mbus_index].txdata[1], mbuspac[mbus_index].txdata[2], mbuspac[mbus_index].txdata[3], mbuspac[mbus_index].txdata[4], mbuspac[mbus_index].txdata[5], mbuspac[mbus_index].txdata[6], mbuspac[mbus_index].txdata[7]);
+				//HAL_UART_Transmit_IT(&huart1, (uint8_t *)mbuspac[mbus_index].txdata, 8);
+				//HAL_UART_Transmit_IT(&huart1, (uint8_t *)"\r\n", 1);
+				mb_timeout_counter = 800;
+				
+				mbus_cycle_count++;
+				
+				if(mbus_index < 12)
+				{
+					/** INCREMENT MODBUS COMMAND INDEX **/
+					mbus_index++;
+				}
+				else
+				{
+					//if(mbus_cycle_count > 12)
+					//{
+					mbus_cycle_count = 0;
+					mbus_index = 0;
+					flag_operation_mode = OPMODE_MODEM;
+				}
 			}
 			
 				/****************************************************/
@@ -430,25 +457,21 @@ int main(void)
 						flag_operation_mode = OPMODE_MODEM;
 					}
 					
-					HAL_Delay(600);
+					HAL_Delay(100);
 					//HAL_UART_Transmit(&huart1, (uint8_t *)strSunspec, strlen(strSunspec), 0x0FFF);
 					huart = &huart1;
-					printf("%d\r\n", mbus_index);
-					HAL_Delay(600);
+					printf("%d | \r\n", mbus_index);
+					HAL_Delay(50);
 					//huart = &huart2;
 					//printf("%s", Rx2buff);
 					rx2buffindex = 0;
 					
-					if(mbus_index < 12)
-					{
-						/** INCREMENT MODBUS COMMAND INDEX **/
-						mbus_index++;
-					}
-					else
-					{
-						mbus_index = 0;
-						mb_timeout_counter = 3000;
-					}
+					//else
+					//{
+						//mbus_index = 0;
+						//mb_timeout_counter = 800;
+					//}
+					
 				}
 				/*****************************************************/
 		}
@@ -487,10 +510,15 @@ int main(void)
 						at_timeout_counter = 1000;
 					}
 				}
+				else
+				{
+					huart = &huart1;
+					printf("RETURN :: %s\r\n", Rx4buff);
+				}
 			}
 			
-			huart = &huart1;
-			printf("%s", Rx4buff);
+			//huart = &huart1;
+			//printf("%s", Rx4buff);
 			rx4buffindex = 0;
 		}
 		
@@ -504,8 +532,24 @@ int main(void)
 		if(flag_uart5_rx == 1)
 		{
 			flag_uart5_rx = 0;
-			huart = &huart1;
-			printf("%s", Rx5buff);
+			
+			
+			if(rx5buffindex > 13)
+			{
+				dcinob = (Rx5buff[12] << 8) | Rx5buff[13];
+				dcoutob = (Rx5buff[10] << 8) | Rx5buff[11];
+				//dckwhout = (Rx5buff[7] << 8) | Rx5buff[8];
+				dckwhout = Rx5buff[9];
+			}
+			
+			obcounter++;
+			if(obcounter > 16)
+			{
+				obcounter = 0;
+				huart = &huart1;
+				printf("IN::%d OUT::%d KWh::%d", dcinob, dcoutob, dckwhout);
+			}
+			//HAL_UART_Transmit(&huart1, (uint8_t *)Rx5buff, rx5buffindex, 0x0fff);
 			rx5buffindex = 0;
 		}
 		
@@ -781,6 +825,19 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+static void UX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PA11 */
+  GPIO_InitStruct.Pin = GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}
+
 
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -833,7 +890,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	
 	if(huart->Instance == UART5)
 	{
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+		//HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
 		rx5buff[1] = 0;
 		Rx5buff[rx5buffindex] = rx5buff[0];
 		rx5buffindex++;
