@@ -135,6 +135,8 @@ int alarm2 = 0;
 int alarm3 = 0;
 char strGet01[500];
 
+int Retry_Timeout_Counter = 240000;
+
 int obcounter = 0;
 
 unsigned char pData[] = {0x1A, 0x00};
@@ -258,6 +260,16 @@ int main(void)
 			HAL_IWDG_Refresh(&IwdgHandle);
 		}
 		
+		if(Retry_Timeout_Counter == 0)
+		{
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_SET);
+			HAL_Delay(1000);
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
+			Retry_Timeout_Counter = 240000;
+			at_timeout_counter = 20000;
+			atcmd_idx = 0;
+		}
+		
 		if(flag_operation_mode == OPMODE_MODEM)
 		{
 			//(flag_atcommand_responded == 1)
@@ -296,6 +308,8 @@ int main(void)
 								huart = &huart1;
 								printf("-->> %s", strGet01);
 								HAL_Delay(1500);
+								
+								Retry_Timeout_Counter = 240000;
 
 								//huart = &huart4;
 								//lidx01 = strlen(atcmdtable[atcmd_idx].cmd);
@@ -498,6 +512,13 @@ int main(void)
 				flag_atcommand_responded = 1;
 				at_timeout_counter = 2000;
 				atcmd_idx = 9;
+			}
+			else if(strstr(Rx4buff, "PDP DEACT"))
+			{
+				flag_atcommand_responded = 0;
+				at_timeout_counter = 20000;
+				atcmd_idx = 0;
+				Retry_Timeout_Counter = 0; //Initiate MODEM RESET
 			}
 			else
 			{
@@ -982,6 +1003,11 @@ void HAL_SYSTICK_Callback(void)
 		{
 		}
 		at_timeout_counter--;
+	}
+	
+	if(Retry_Timeout_Counter > 0)
+	{
+		Retry_Timeout_Counter--;
 	}
 	
 }
