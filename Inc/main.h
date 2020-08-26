@@ -60,6 +60,12 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
 
+typedef struct __INT_ARRAY
+{
+	int array[55];
+	int size;
+}INT_ARRAY;
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
