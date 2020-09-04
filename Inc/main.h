@@ -60,9 +60,15 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
 
+typedef struct __PULSE_STATE
+{
+	int count;
+	int state;
+}PULSE_STATE;
+
 typedef struct __INT_ARRAY
 {
-	int array[55];
+	PULSE_STATE array[85];
 	int size;
 }INT_ARRAY;
 

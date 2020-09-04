@@ -54,6 +54,7 @@ ADC_HandleTypeDef hadc1;
 IWDG_HandleTypeDef hiwdg;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim6;
 
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
@@ -76,6 +77,7 @@ static void MX_UART5_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_IWDG_Init(void);
+static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -182,7 +184,9 @@ PUTCHAR_PROTOTYPE
 
 IWDG_HandleTypeDef   IwdgHandle;
 
-INT_ARRAY time_list = {{5,5,20,10}, 4};
+INT_ARRAY time_list = {{{94,0},{20,1},{31,0},{10,1},{62,0},{10,1},{104,0},{10,1},{10,0},{10,1},{83,0},{10,1},{104,0},{10,1},{10,0},{83,1},{10,0},{10,1},{10,0},{10,1},{83,0},{10,1},{31,0},{10,1},{62,0},{2000,1},{94,0},{20,1},{10,0},{20,1},{72,0},{10,1},{10,0},{10,1},{83,0},{10,1},{10,0},{10,1},{20,0},{10,1},{20,0},{20,1},{10,0},{10,1},{104,0},{10,1},{10,0},{20,1},{52,0},{10,1},{10,0},{10,1},{10,0},{10,1},{83,0},{10,1},{52,0},{10,1},{10,0},{10,1},{20,0},{1,1}}, 62};
+INT_ARRAY time_list2 = {{{94,0},{20,1},{10,0},{20,1},{72,0},{10,1},{10,0},{10,1},{83,0},{10,1},{10,0},{10,1},{20,0},{10,1},{20,0},{20,1},{10,0},{10,1},{104,0},{10,1},{10,0},{20,1},{52,0},{10,1},{10,0},{10,1},{10,0},{10,1},{83,0},{10,1},{52,0},{10,1},{10,0},{10,1},{20,0},{1,1}}, 36};	
+
 int t2tick = 0;
 int time_list_idx = 0;
 int t_delay = 500;
@@ -240,9 +244,10 @@ int main(void)
   MX_USART1_UART_Init();
   MX_UART4_Init();
   MX_UART5_Init();
-  MX_TIM2_Init();
+  //MX_TIM2_Init();
   MX_USART2_UART_Init();
-  MX_IWDG_Init();
+  //MX_IWDG_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 	
 	UX_GPIO_Init();
@@ -260,12 +265,12 @@ int main(void)
 	
 	at_timeout_counter = 20000;
 	
-	
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	
+	HAL_TIM_Base_Start_IT(&htim6);
 	
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
 	
@@ -275,7 +280,7 @@ int main(void)
 		{
 			systick_clock_01 = 0;
 			flag_systick_01 = 0;
-			//HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+			//HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
 			HAL_IWDG_Refresh(&IwdgHandle);
 		}
 		
@@ -721,15 +726,13 @@ static void MX_IWDG_Init(void)
   /* USER CODE BEGIN IWDG_Init 1 */
 
   /* USER CODE END IWDG_Init 1 */
-  /*
-	hiwdg.Instance = IWDG;
+  hiwdg.Instance = IWDG;
   hiwdg.Init.Prescaler = IWDG_PRESCALER_4;
   hiwdg.Init.Reload = 4095;
   if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
   {
     Error_Handler();
   }
-	*/
   /* USER CODE BEGIN IWDG_Init 2 */
 
   /* USER CODE END IWDG_Init 2 */
@@ -778,6 +781,46 @@ static void MX_TIM2_Init(void)
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 0;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 700;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+	//HAL_TIM_Base_Init(&htim6);
+	//__HAL_TIM_ENABLE(&htim6);
+  /* USER CODE END TIM6_Init 2 */
 
 }
 
@@ -954,8 +997,6 @@ static void UX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
 
-
-
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1)
@@ -1104,41 +1145,47 @@ void HAL_SYSTICK_Callback(void)
 	{
 		Retry_Timeout_Counter--;
 	}
-	
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if(htim->Instance == TIM2)
+	if(htim->Instance == TIM6)
 	{
-		if(tidx < 500)
+		
+		if(tidx < 101851)
 		{
 			tidx++;
-			if(tidx == 499)
-			{
-				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);
-			}
 		}
 		else
 		{
 			if(time_list_idx < time_list.size)
 			{
-				if(t2tick < time_list.array[time_list_idx])
+				
+				if(t2tick < time_list.array[time_list_idx].count)
 				{
+					if(t2tick == 0)
+					{
+						if(time_list.array[time_list_idx].state == 1)
+						{
+							HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
+						}
+						else
+						{
+							HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);
+						}
+					}
 					t2tick++;
 				}
 				else
 				{
 					t2tick = 0;
 					time_list_idx++;
-					HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
 				}
 			}
 			else
 			{
 				time_list_idx = 0;
 				tidx = 0;
-				HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
 			}
 		}
 	}
