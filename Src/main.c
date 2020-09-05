@@ -323,7 +323,7 @@ int main(void)
 								/*		GATHER OUTBACK AND SUN DATA 											**/
 								/*********************************************************/
 								//sprintf(strGet01, "%s", "GET /gateway/pinlog.php");
-								sprintf(strGet01, "%s?dckwhout=%d&dcinob=%d&dcoutob=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dckwhout, dcinob, dcoutob, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								sprintf(strGet01, "%s?serial=00000003321&imei=864369031332525&ccid=UDU2013072402&siteid=MYTRL20&devid=0x00000001&cellno=+8801818697652&dckwhout=%d&dcinob=%d&dcoutob=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dckwhout, dcinob, dcoutob, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								lidx01 = strlen(strGet01);
 								strGet01[lidx01] = 0x1A;
 								lidx01++;
