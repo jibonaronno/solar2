@@ -41,6 +41,12 @@ extern MBUSPACDEF mbuspac[2];
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define ONLINE_LED_ON			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET)
+#define ONLINE_LED_OFF		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET)
+#define CONNECT_LED_ON		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET)
+#define CONNECT_LED_OFF		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET)
+#define ERROR_LED_ON			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET)
+#define ERROR_LED_OFF			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -124,6 +130,17 @@ volatile int at_timeout_counter = 0;
 volatile int atcmd_idx = 0;
 volatile uint8_t flag_ego = 0;
 
+int dccurrentob1 = 0;
+int dckwhout1 = 0;
+int dcinob1 = 0;
+int dcoutob1 = 0;
+
+int dccurrentob2 = 0;
+int dckwhout2 = 0;
+int dcinob2 = 0;
+int dcoutob2 = 0;
+
+int dccurrentob = 0;
 int dckwhout = 10;
 int dcinob = 22;
 int dcoutob = 33;
@@ -143,6 +160,10 @@ int alarm2 = 0;
 int alarm3 = 0;
 char strGet01[500];
 
+uint16_t Outback_PIN = GPIO_PIN_6;
+GPIO_TypeDef *Outback_PORT = GPIOC;
+uint16_t OutbackIdx = 0;
+
 int Retry_Timeout_Counter = 240000;
 
 int obcounter = 0;
@@ -150,6 +171,7 @@ int obcounter = 0;
 unsigned char pData[] = {0x1A, 0x00};
 
 int mbus_index = 0;
+int mbus_index02 = 0;
 
 struct __FILE
 {
@@ -289,6 +311,10 @@ int main(void)
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_SET);
 			HAL_Delay(1000);
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
+			ERROR_LED_OFF;
+			CONNECT_LED_OFF;
+			ONLINE_LED_OFF;
+			HAL_Delay(10000); //Watch Dog Reset
 			Retry_Timeout_Counter = 240000;
 			at_timeout_counter = 20000;
 			atcmd_idx = 0;
@@ -323,7 +349,7 @@ int main(void)
 								/*		GATHER OUTBACK AND SUN DATA 											**/
 								/*********************************************************/
 								//sprintf(strGet01, "%s", "GET /gateway/pinlog.php");
-								sprintf(strGet01, "%s?serial=00000003321&imei=864369031332525&ccid=UDU2013072402&siteid=MYTRL20&devid=0x00000001&cellno=+8801818697652&dckwhout=%d&dcinob=%d&dcoutob=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dckwhout, dcinob, dcoutob, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								sprintf(strGet01, "%s?serial=00000003321&imei=864369031332525&ccid=UDU2013072402&siteid=MYTRL20&devid=0x00000001&cellno=+8801818697652&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								lidx01 = strlen(strGet01);
 								strGet01[lidx01] = 0x1A;
 								lidx01++;
@@ -405,6 +431,7 @@ int main(void)
 				HAL_Delay(200);
 				huart = &huart1;
 				printf("%d :: %02X %02X %02X %02X %02X %02X %02X %02X\r\n", mbus_index, mbuspac[mbus_index].txdata[0], mbuspac[mbus_index].txdata[1], mbuspac[mbus_index].txdata[2], mbuspac[mbus_index].txdata[3], mbuspac[mbus_index].txdata[4], mbuspac[mbus_index].txdata[5], mbuspac[mbus_index].txdata[6], mbuspac[mbus_index].txdata[7]);
+				
 				//HAL_UART_Transmit_IT(&huart1, (uint8_t *)mbuspac[mbus_index].txdata, 8);
 				//HAL_UART_Transmit_IT(&huart1, (uint8_t *)"\r\n", 1);
 				mb_timeout_counter = 800;
@@ -418,11 +445,12 @@ int main(void)
 				}
 				else
 				{
-					//if(mbus_cycle_count > 12)
-					//{
-					mbus_cycle_count = 0;
-					mbus_index = 0;
-					flag_operation_mode = OPMODE_MODEM;
+					if(mbus_cycle_count > 12)
+					{
+						mbus_cycle_count = 0;
+						mbus_index = 0;
+						flag_operation_mode = OPMODE_MODEM;
+					}
 				}
 			}
 			
@@ -431,74 +459,85 @@ int main(void)
 				/****************************************************/
 				if(flag_uart2_rx == 1)
 				{
+					if(mbus_index > 0)
+					{
+						mbus_index02 = mbus_index - 1;
+					}
+					else
+					{
+						mbus_index02 = 12; //maximum index
+					}
+					
 					flag_uart2_rx = 0;
-					if(mbuspac[mbus_index].cmd == VOLT_PV1_CMD)
+					if(mbuspac[mbus_index02].cmd == VOLT_PV1_CMD)
 					{
 						pv1volt = (Rx2buff[3] << 8)|(Rx2buff[4]);
 					}
 					
-					if(mbuspac[mbus_index].cmd == VOLT_PV2_CMD)
+					if(mbuspac[mbus_index02].cmd == VOLT_PV2_CMD)
 					{
 						pv2volt = (Rx2buff[3] << 8)|(Rx2buff[4]);
 					}
 					
-					if(mbuspac[mbus_index].cmd == VOLT_A_CMD)
+					if(mbuspac[mbus_index02].cmd == VOLT_A_CMD)
 					{
 						avolt = (Rx2buff[3] << 8)|(Rx2buff[4]);
 					}
 					
-					if(mbuspac[mbus_index].cmd == VOLT_B_CMD)
+					if(mbuspac[mbus_index02].cmd == VOLT_B_CMD)
 					{
 						bvolt = (Rx2buff[3] << 8)|(Rx2buff[4]);
 					}
 					
-					if(mbuspac[mbus_index].cmd == VOLT_C_CMD)
+					if(mbuspac[mbus_index02].cmd == VOLT_C_CMD)
 					{
 						cvolt = (Rx2buff[3] << 8)|(Rx2buff[4]);
 					}
 					
-					if(mbuspac[mbus_index].cmd == ALARM1_CMD)
+					if(mbuspac[mbus_index02].cmd == ALARM1_CMD)
 					{
 						alarm1 = (Rx2buff[3] << 8)|(Rx2buff[4]);
 					}
 					
-					if(mbuspac[mbus_index].cmd == ALARM2_CMD)
+					if(mbuspac[mbus_index02].cmd == ALARM2_CMD)
 					{
 						alarm2 = (Rx2buff[3] << 8)|(Rx2buff[4]);
 					}
 					
-					if(mbuspac[mbus_index].cmd == ALARM3_CMD)
+					if(mbuspac[mbus_index02].cmd == ALARM3_CMD)
 					{
 						alarm3 = (Rx2buff[3] << 8)|(Rx2buff[4]);
 					}
 					
-					if(mbuspac[mbus_index].cmd == CURR_A_CMD)
+					if(mbuspac[mbus_index02].cmd == CURR_A_CMD)
 					{
 						acur = (Rx2buff[3] << 24)|(Rx2buff[4] << 16) | (Rx2buff[5] << 8) | Rx2buff[6];
 					}
 					
-					if(mbuspac[mbus_index].cmd == CURR_B_CMD)
+					if(mbuspac[mbus_index02].cmd == CURR_B_CMD)
 					{
 						bcur = (Rx2buff[3] << 24)|(Rx2buff[4] << 16) | (Rx2buff[5] << 8) | Rx2buff[6];
 					}
 					
-					if(mbuspac[mbus_index].cmd == CURR_C_CMD)
+					if(mbuspac[mbus_index02].cmd == CURR_C_CMD)
 					{
 						ccur = (Rx2buff[3] << 24)|(Rx2buff[4] << 16) | (Rx2buff[5] << 8) | Rx2buff[6];
 					}
 					
-					if(mbuspac[mbus_index].cmd == APOWER_CMD)
+					if(mbuspac[mbus_index02].cmd == APOWER_CMD)
 					{
 						ackwhsun = (Rx2buff[3] << 24)|(Rx2buff[4] << 16) | (Rx2buff[5] << 8) | Rx2buff[6];
-						sprintf(strSunspec, "PV1-%d PV2-%d Avolt-%d Bvolt-%d Cvolt-%d Acur-%d Bcur-%d Ccur-%d Alrm1-%d Alrm2-%d Alrm3-%d Activepower-%d", pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur, alarm1, alarm2, alarm3, ackwhsun);
+						//sprintf(strSunspec, "PV1-%d PV2-%d Avolt-%d Bvolt-%d Cvolt-%d Acur-%d Bcur-%d Ccur-%d Alrm1-%d Alrm2-%d Alrm3-%d Activepower-%d", pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur, alarm1, alarm2, alarm3, ackwhsun);
 						
-						flag_operation_mode = OPMODE_MODEM;
+						////<TEMPORARY COMMENTED>
+						////flag_operation_mode = OPMODE_MODEM;
 					}
 					
 					HAL_Delay(100);
 					//HAL_UART_Transmit(&huart1, (uint8_t *)strSunspec, strlen(strSunspec), 0x0FFF);
+					sprintf(strSunspec, "PV1-%d PV2-%d Avolt-%d Bvolt-%d Cvolt-%d Acur-%d Bcur-%d Ccur-%d Alrm1-%d Alrm2-%d Alrm3-%d Activepower-%d", pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur, alarm1, alarm2, alarm3, ackwhsun);
 					huart = &huart1;
-					printf("%d | \r\n", mbus_index);
+					printf("%d | %s\r\n", mbus_index02, strSunspec);
 					HAL_Delay(50);
 					//huart = &huart2;
 					//printf("%s", Rx2buff);
@@ -521,6 +560,9 @@ int main(void)
 		{
 			flag_uart4_rx = 0;
 			
+			huart = &huart1;
+			printf("MODEM :: %s\r\n", Rx4buff);
+			
 			if(strstr(atcmdtable[atcmd_idx].ret, "__EGO"))
 			{
 				flag_ego = 1;
@@ -529,6 +571,16 @@ int main(void)
 			{
 				flag_atcommand_responded = 1;
 				at_timeout_counter = 2000;
+				
+				if(atcmd_idx == 3)
+				{
+					ERROR_LED_ON;
+					flag_atcommand_responded = 0;
+					at_timeout_counter = 20000;
+					atcmd_idx = 0;
+					Retry_Timeout_Counter = 0; //Initiate MODEM RESET
+				}
+
 				atcmd_idx = -1;
 			}
 			else if(strstr(atcmdtable[atcmd_idx].cmd, "CIPSTATUS") && strstr(Rx4buff, "TCP CLOSE"))
@@ -537,12 +589,21 @@ int main(void)
 				at_timeout_counter = 2000;
 				atcmd_idx = 9;
 			}
-			else if(strstr(Rx4buff, "PDP DEACT"))
+			else if(strstr(Rx4buff, "ALREADY CONNECT"))
+			{
+				flag_atcommand_responded = 1;
+				at_timeout_counter = 2000;
+				atcmd_idx = 9;
+			}
+			else if(strstr(Rx4buff, "+PDP: DEACT"))
 			{
 				flag_atcommand_responded = 0;
 				at_timeout_counter = 20000;
 				atcmd_idx = 0;
 				Retry_Timeout_Counter = 0; //Initiate MODEM RESET
+				ERROR_LED_ON;
+				CONNECT_LED_OFF;
+				ONLINE_LED_OFF;
 			}
 			else
 			{
@@ -554,11 +615,32 @@ int main(void)
 					{
 						at_timeout_counter = 1000;
 					}
+					
+					if(atcmd_idx >= 7)
+					{
+						ONLINE_LED_ON;
+					}
+					
+					if(atcmd_idx >= 10)
+					{
+						CONNECT_LED_ON;
+					}
+					
+					if(atcmd_idx >= 14)
+					{
+						CONNECT_LED_OFF;
+					}
+					
 				}
 				else
 				{
 					huart = &huart1;
 					printf("RETURN :: %s\r\n", Rx4buff);
+					
+					if(strstr(Rx4buff, "CLOSED"))
+					{
+						CONNECT_LED_OFF;
+					}
 				}
 			}
 			
@@ -578,23 +660,41 @@ int main(void)
 		{
 			flag_uart5_rx = 0;
 			
-			
 			if(rx5buffindex > 13)
 			{
-				dcinob = (Rx5buff[12] << 8) | Rx5buff[13];
-				dcoutob = (Rx5buff[10] << 8) | Rx5buff[11];
-				//dckwhout = (Rx5buff[7] << 8) | Rx5buff[8];
-				dckwhout = Rx5buff[9];
+				if(OutbackIdx == 0)
+				{
+					dcinob = (Rx5buff[12] << 8) | Rx5buff[13];
+					dcoutob = (Rx5buff[10] << 8) | Rx5buff[11];
+					dckwhout = Rx5buff[9];
+					dccurrentob = ((Rx5buff[3] & 0x0F) * 10) + (Rx5buff[1] & 0x0F);
+				}
+				if(OutbackIdx == 1)
+				{
+					dcinob1 = (Rx5buff[12] << 8) | Rx5buff[13];
+					dcoutob1 = (Rx5buff[10] << 8) | Rx5buff[11];
+					dckwhout1 = Rx5buff[9];
+					dccurrentob1 = ((Rx5buff[3] & 0x0F) * 10) + (Rx5buff[1] & 0x0F);
+				}
+				if(OutbackIdx == 2)
+				{
+					dcinob2 = (Rx5buff[12] << 8) | Rx5buff[13];
+					dcoutob2 = (Rx5buff[10] << 8) | Rx5buff[11];
+					dckwhout2 = Rx5buff[9];
+					dccurrentob2 = ((Rx5buff[3] & 0x0F) * 10) + (Rx5buff[1] & 0x0F);
+				}
 			}
 			
 			obcounter++;
-			if(obcounter > 16)
+			if(obcounter > 5)
 			{
 				obcounter = 0;
 				huart = &huart1;
-				printf("IN::%d OUT::%d KWh::%d", dcinob, dcoutob, dckwhout);
+				printf("IN1::%d OUT1::%d CURR1::%d KWh1::%d IN2:%d OUT2:%d CURR2:%d Kwh2:%d IN3:%d OUT3:%d CURR3:%d Kwh3:%d\r\n", dcinob, dcoutob, dccurrentob, dckwhout, dcinob1, dcoutob1, dccurrentob1, dckwhout1, dcinob2, dcoutob2, dccurrentob2, dckwhout2);
 			}
 			//HAL_UART_Transmit(&huart1, (uint8_t *)Rx5buff, rx5buffindex, 0x0fff);
+			//huart = &huart1;
+			//printf("\r\n");
 			rx5buffindex = 0;
 		}
 		
@@ -996,18 +1096,22 @@ static void UX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 	
-	GPIO_InitStruct.Pin = GPIO_PIN_7;
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
+	
+	GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1)
 	{
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+		//HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
 		rx1buff[1] = 0;
 		Rx1buff[rx1buffindex] = rx1buff[0];
 		rx1buffindex++;
@@ -1030,7 +1134,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	
 	if(huart->Instance == UART4)
 	{
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+		//HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
 		rx4buff[1] = 0;
 		Rx4buff[rx4buffindex] = rx4buff[0];
 		rx4buffindex++;
@@ -1068,7 +1172,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	
 	if(huart->Instance == USART2)
 	{
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
+		//HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
 		rx2buff[1] = 0;
 		Rx2buff[rx2buffindex] = rx2buff[0];
 		rx2buffindex++;
@@ -1173,15 +1277,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					{
 						if(time_list.array[time_list_idx].state == 1)
 						{
-							HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
-							HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET);
-							HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+							HAL_GPIO_WritePin(Outback_PORT, Outback_PIN, GPIO_PIN_SET);
 						}
 						else
 						{
-							HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);
-							HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
-							HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+							HAL_GPIO_WritePin(Outback_PORT, Outback_PIN, GPIO_PIN_RESET);
 						}
 					}
 					t2tick++;
@@ -1196,6 +1296,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			{
 				time_list_idx = 0;
 				tidx = 0;
+				
+				if(OutbackIdx == 0)
+				{
+					OutbackIdx = 1;
+					Outback_PIN = GPIO_PIN_7;
+					Outback_PORT = GPIOC;
+				}
+				else if(OutbackIdx == 1)
+				{
+					OutbackIdx = 2;
+					Outback_PIN = GPIO_PIN_8;
+					Outback_PORT = GPIOA;
+				}
+				else if(OutbackIdx == 2)
+				{
+					OutbackIdx = 0;
+					Outback_PIN = GPIO_PIN_6;
+					Outback_PORT = GPIOC;
+				}
 			}
 		}
 	}
