@@ -141,30 +141,32 @@ int dcinob2 = 0;
 int dcoutob2 = 0;
 
 int dccurrentob = 0;
-int dckwhout = 10;
-int dcinob = 22;
-int dcoutob = 33;
-int ackwhsun = 44;
-int alarmsun = 2;
-int inpower = 1;
-int pv1volt = 330;
-int pv2volt = 330;
-int avolt = 220;
-int bvolt = 220;
-int cvolt = 230;
-int acur = 1;
-int bcur = 2;
-int ccur = 1;
+int dckwhout = 0;
+int dcinob = 0;
+int dcoutob = 0;
+int ackwhsun = 0;
+int alarmsun = 0;
+int inpower = 0;
+int pv1volt = 0;
+int pv2volt = 0;
+int avolt = 0;
+int bvolt = 0;
+int cvolt = 0;
+int acur = 0;
+int bcur = 0;
+int ccur = 0;
 int alarm1 = 0;
 int alarm2 = 0;
 int alarm3 = 0;
 char strGet01[500];
 
+int Outback_Rx_watchdog_counter = 0;
 uint16_t Outback_PIN = GPIO_PIN_6;
 GPIO_TypeDef *Outback_PORT = GPIOC;
 uint16_t OutbackIdx = 0;
+volatile int flag_lock = 0;
 
-int Retry_Timeout_Counter = 240000;
+int Retry_Timeout_Counter = 280000;
 
 int obcounter = 0;
 
@@ -351,7 +353,8 @@ int main(void)
 								/*		GATHER OUTBACK AND SUN DATA 											**/
 								/*********************************************************/
 								//sprintf(strGet01, "%s", "GET /gateway/pinlog.php");
-								sprintf(strGet01, "%s?serial=00000003321&imei=864369031332525&ccid=UDU2013072402&siteid=MYTRL21&devid=0x00000002&cellno=+8801818697652&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003322&imei=864713033803712&ccid=UDU2013072502&siteid=MYTRL18&devid=0x00000003&cellno=+8801608433197&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								sprintf(strGet01, "%s?serial=00000003323&imei=864369031332525&ccid=UDU2013072602&siteid=MYTRL19&devid=0x00000004&cellno=+8801301706143&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								lidx01 = strlen(strGet01);
 								strGet01[lidx01] = 0x1A;
 								lidx01++;
@@ -361,7 +364,8 @@ int main(void)
 								printf("-->> %s", strGet01);
 								HAL_Delay(1500);
 								
-								Retry_Timeout_Counter = 240000;
+								////<TEMPORARY COMMENTED>
+								////Retry_Timeout_Counter = 240000;
 
 								//huart = &huart4;
 								//lidx01 = strlen(atcmdtable[atcmd_idx].cmd);
@@ -428,6 +432,23 @@ int main(void)
 			
 			if(mb_timeout_counter == 0)
 			{
+				
+				if(mbus_index == 0)
+				{
+					pv1volt = 0;
+					pv2volt = 0;
+					avolt = 0;
+					bvolt = 0;
+					cvolt = 0;
+					acur = 0;
+					bcur = 0;
+					ccur = 0;
+					alarm1 = 0;
+					alarm2 = 0;
+					alarm3 = 0;
+					ackwhsun = 0;
+					
+				}
 				
 				HAL_UART_Transmit_IT(&huart2, (uint8_t *)mbuspac[mbus_index].txdata, 8);
 				HAL_Delay(200);
@@ -555,6 +576,26 @@ int main(void)
 				/*****************************************************/
 		}
 		
+		if(Outback_Rx_watchdog_counter == 0)
+		{
+			flag_lock = 0;
+			
+			dckwhout = 0;
+			dcinob = 0;
+			dcoutob = 0;
+			dccurrentob = 0;
+			
+			dckwhout1 = 0;
+			dcinob1 = 0;
+			dcoutob1 = 0;
+			dccurrentob1 = 0;
+			
+			dckwhout2 = 0;
+			dcinob2 = 0;
+			dcoutob2 = 0;
+			dccurrentob2 = 0;
+		}
+		
 		/****************************************************/
 		/* DATA CAME FROM MODEM															*/
 		/****************************************************/
@@ -594,7 +635,6 @@ int main(void)
 			else if(strstr(atcmdtable[atcmd_idx].cmd, "CIPSTATUS") && strstr(Rx4buff, "ERROR"))
 			{
 				flag_atcommand_responded = 1;
-				at_timeout_counter = 2000;
 				
 				if(atcmd_idx == 3)
 				{
@@ -603,9 +643,10 @@ int main(void)
 					at_timeout_counter = 20000;
 					atcmd_idx = 0;
 				}
-				
+				flag_atcommand_responded = 0;
+				at_timeout_counter = 20000;
+				atcmd_idx = 0;
 				Retry_Timeout_Counter = 0; //Initiate MODEM RESET
-				atcmd_idx = -1;
 			}
 			else
 			{
@@ -664,12 +705,16 @@ int main(void)
 			
 			if(rx5buffindex > 13)
 			{
+				
+				Outback_Rx_watchdog_counter = 10000;
+				
 				if(OutbackIdx == 0)
 				{
 					dcinob = (Rx5buff[12] << 8) | Rx5buff[13];
 					dcoutob = (Rx5buff[10] << 8) | Rx5buff[11];
 					dckwhout = Rx5buff[9];
 					dccurrentob = ((Rx5buff[3] & 0x0F) * 10) + (Rx5buff[1] & 0x0F);
+					flag_lock = 0;
 				}
 				if(OutbackIdx == 1)
 				{
@@ -677,6 +722,7 @@ int main(void)
 					dcoutob1 = (Rx5buff[10] << 8) | Rx5buff[11];
 					dckwhout1 = Rx5buff[9];
 					dccurrentob1 = ((Rx5buff[3] & 0x0F) * 10) + (Rx5buff[1] & 0x0F);
+					flag_lock = 0;
 				}
 				if(OutbackIdx == 2)
 				{
@@ -684,6 +730,7 @@ int main(void)
 					dcoutob2 = (Rx5buff[10] << 8) | Rx5buff[11];
 					dckwhout2 = Rx5buff[9];
 					dccurrentob2 = ((Rx5buff[3] & 0x0F) * 10) + (Rx5buff[1] & 0x0F);
+					flag_lock = 0;
 				}
 			}
 			
@@ -1257,6 +1304,11 @@ void HAL_SYSTICK_Callback(void)
 	{
 		Retry_Timeout_Counter--;
 	}
+	
+	if(Outback_Rx_watchdog_counter > 0)
+	{
+		Outback_Rx_watchdog_counter--;
+	}
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -1272,47 +1324,61 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 			if(time_list_idx < time_list.size)
 			{
-				
-				if(t2tick < time_list.array[time_list_idx].count)
+				if(flag_lock == 0)
 				{
-					if(t2tick == 0)
+					if(t2tick < time_list.array[time_list_idx].count)
 					{
-						if(time_list.array[time_list_idx].state == 1)
+						if(t2tick == 0)
 						{
-							HAL_GPIO_WritePin(Outback_PORT, Outback_PIN, GPIO_PIN_SET);
+							if(time_list.array[time_list_idx].state == 1)
+							{
+								HAL_GPIO_WritePin(Outback_PORT, Outback_PIN, GPIO_PIN_SET);
+							}
+							else
+							{
+								HAL_GPIO_WritePin(Outback_PORT, Outback_PIN, GPIO_PIN_RESET);
+							}
 						}
-						else
-						{
-							HAL_GPIO_WritePin(Outback_PORT, Outback_PIN, GPIO_PIN_RESET);
-						}
+						t2tick++;
 					}
-					t2tick++;
-				}
-				else
-				{
-					t2tick = 0;
-					time_list_idx++;
+					else
+					{
+						t2tick = 0;
+						time_list_idx++;
+					}
 				}
 			}
 			else
 			{
 				time_list_idx = 0;
 				tidx = 0;
+				flag_lock = 1;
 				
 				if(OutbackIdx == 0)
 				{
+					
 					OutbackIdx = 1;
 					Outback_PIN = GPIO_PIN_7;
 					Outback_PORT = GPIOC;
 				}
 				else if(OutbackIdx == 1)
 				{
+					//dckwhout1 = 0;
+					//dcinob1 = 0;
+					//dcoutob1 = 0;
+					//dccurrentob1 = 0;
+					
 					OutbackIdx = 2;
 					Outback_PIN = GPIO_PIN_8;
 					Outback_PORT = GPIOA;
 				}
 				else if(OutbackIdx == 2)
 				{
+					//dckwhout2 = 0;
+					//dcinob2 = 0;
+					//dcoutob2 = 0;
+					//dccurrentob2 = 0;
+					
 					OutbackIdx = 0;
 					Outback_PIN = GPIO_PIN_6;
 					Outback_PORT = GPIOC;
