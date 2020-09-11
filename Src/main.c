@@ -296,6 +296,8 @@ int main(void)
 	
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
 	
+	HAL_UART_Transmit(&huart4, (unsigned char*)"AT+CGMM\r\n", lidx01, 0x0fff);
+	
   while (1)
   {
 		if(flag_systick_01 == 1)
@@ -349,7 +351,7 @@ int main(void)
 								/*		GATHER OUTBACK AND SUN DATA 											**/
 								/*********************************************************/
 								//sprintf(strGet01, "%s", "GET /gateway/pinlog.php");
-								sprintf(strGet01, "%s?serial=00000003321&imei=864369031332525&ccid=UDU2013072402&siteid=MYTRL20&devid=0x00000001&cellno=+8801818697652&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								sprintf(strGet01, "%s?serial=00000003321&imei=864369031332525&ccid=UDU2013072402&siteid=MYTRL21&devid=0x00000002&cellno=+8801818697652&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								lidx01 = strlen(strGet01);
 								strGet01[lidx01] = 0x1A;
 								lidx01++;
@@ -567,29 +569,13 @@ int main(void)
 			{
 				flag_ego = 1;
 			}
-			else if(strstr(atcmdtable[atcmd_idx].cmd, "CIPSTATUS") && strstr(Rx4buff, "ERROR"))
-			{
-				flag_atcommand_responded = 1;
-				at_timeout_counter = 2000;
-				
-				if(atcmd_idx == 3)
-				{
-					ERROR_LED_ON;
-					flag_atcommand_responded = 0;
-					at_timeout_counter = 20000;
-					atcmd_idx = 0;
-					Retry_Timeout_Counter = 0; //Initiate MODEM RESET
-				}
-
-				atcmd_idx = -1;
-			}
-			else if(strstr(atcmdtable[atcmd_idx].cmd, "CIPSTATUS") && strstr(Rx4buff, "TCP CLOSE"))
+			else if(strstr(Rx4buff, "ALREADY CONNECT"))
 			{
 				flag_atcommand_responded = 1;
 				at_timeout_counter = 2000;
 				atcmd_idx = 9;
 			}
-			else if(strstr(Rx4buff, "ALREADY CONNECT"))
+			else if(strstr(atcmdtable[atcmd_idx].cmd, "CIPSTATUS") && strstr(Rx4buff, "TCP CLOSE"))
 			{
 				flag_atcommand_responded = 1;
 				at_timeout_counter = 2000;
@@ -604,6 +590,22 @@ int main(void)
 				ERROR_LED_ON;
 				CONNECT_LED_OFF;
 				ONLINE_LED_OFF;
+			}
+			else if(strstr(atcmdtable[atcmd_idx].cmd, "CIPSTATUS") && strstr(Rx4buff, "ERROR"))
+			{
+				flag_atcommand_responded = 1;
+				at_timeout_counter = 2000;
+				
+				if(atcmd_idx == 3)
+				{
+					ERROR_LED_ON;
+					flag_atcommand_responded = 0;
+					at_timeout_counter = 20000;
+					atcmd_idx = 0;
+				}
+				
+				Retry_Timeout_Counter = 0; //Initiate MODEM RESET
+				atcmd_idx = -1;
 			}
 			else
 			{
