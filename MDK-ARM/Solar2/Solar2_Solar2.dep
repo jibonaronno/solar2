@@ -5,7 +5,7 @@ I (C:\Keil_v5\ARM\ARMCC_505u2\include\stdio.h)(0x54C26FE8)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\stdlib.h)(0x54C26FE8)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\string.h)(0x54C26FE8)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\stdbool.h)(0x54C26FE8)
-F (..\Src\atcommands.c)(0x5F572DA4)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include-I C:\ARM\Solar2\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F10X_CL -DUSE_HAL_DRIVER -DSTM32F107xC-o solar2\atcommands.o --omf_browse solar2\atcommands.crf --depend solar2\atcommands.d)
+F (..\Src\atcommands.c)(0x5F7054ED)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include-I C:\ARM\Solar2\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F10X_CL -DUSE_HAL_DRIVER -DSTM32F107xC-o solar2\atcommands.o --omf_browse solar2\atcommands.crf --depend solar2\atcommands.d)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\stdio.h)(0x54C26FE8)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\stdlib.h)(0x54C26FE8)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\string.h)(0x54C26FE8)
@@ -16,7 +16,7 @@ I (C:\Keil_v5\ARM\ARMCC_505u2\include\stdio.h)(0x54C26FE8)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\stdlib.h)(0x54C26FE8)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\string.h)(0x54C26FE8)
 I (../Inc/modbusmaster.h)(0x5F46643B)
-F (../Src/main.c)(0x5F5BCFE9)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include-I C:\ARM\Solar2\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F10X_CL -DUSE_HAL_DRIVER -DSTM32F107xC-o solar2\main.o --omf_browse solar2\main.crf --depend solar2\main.d)
+F (../Src/main.c)(0x5F7496E3)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc -I../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I../Drivers/CMSIS/Include-I C:\ARM\Solar2\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\Core\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include-D__UVISION_VERSION="516" -D_RTE_ -DSTM32F10X_CL -DUSE_HAL_DRIVER -DSTM32F107xC-o solar2\main.o --omf_browse solar2\main.crf --depend solar2\main.d)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\stdio.h)(0x54C26FE8)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\stdlib.h)(0x54C26FE8)
 I (C:\Keil_v5\ARM\ARMCC_505u2\include\string.h)(0x54C26FE8)

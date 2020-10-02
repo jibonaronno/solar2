@@ -37,6 +37,7 @@ atcmd_t atcmdtable[] = {
 	{"AT+CIFSR\r\n", "__EGO", 5},
 	{"AT+CIPSTATUS\r\n","IP STATUS",5},
 	{"AT+CIPSTART=\"TCP\",\"103.110.113.54\",\"8090\"\r\n", "CONNECT OK", 5},
+	//{"AT+CIPSTART=\"TCP\",\"144.91.99.51\",\"80\"\r\n", "CONNECT OK", 5},
 	{"AT+CIPSEND\r", ">", 5},
 	{"GET /gateway/pinlog.php\r\n", "^Z", 20},
 	{"^Z", "SEND OK", 20},
