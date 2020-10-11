@@ -72,6 +72,14 @@ typedef struct __INT_ARRAY
 	int size;
 }INT_ARRAY;
 
+typedef struct __SETTINGS
+{
+	char server_address[30];
+	char server_port[10];
+}SETTINGS;
+
+#define LSIZE	sizeof(SETTINGS)
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

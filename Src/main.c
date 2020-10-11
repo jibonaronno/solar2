@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "atcommands.h"
 #include "modbusmaster.h"
+#include "tm_onewire.h"
 
 extern atcmd_t atcmdtable[];
 extern MBUSPACDEF mbuspac[2];
@@ -68,6 +69,8 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+
+uint8_t flash[2048];
 
 UART_HandleTypeDef *huart;
 
@@ -205,6 +208,7 @@ PUTCHAR_PROTOTYPE
 #define OPMODE_MODEM			1
 #define OPMODE_MODBUS			2
 #define OPMODE_OUTBACK		3
+#define OPMODE_SENDSMS		4
 
 IWDG_HandleTypeDef   IwdgHandle;
 
@@ -215,6 +219,8 @@ int t2tick = 0;
 int time_list_idx = 0;
 int t_delay = 500;
 int tidx = 0;
+	
+SETTINGS *settings;
 
 /* USER CODE END 0 */
 
@@ -299,6 +305,12 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
 	
 	HAL_UART_Transmit(&huart4, (unsigned char*)"AT+CGMM\r\n", lidx01, 0x0fff);
+	
+	/*--------------------------------------------------------------------------*/
+	//READ STORED DATA FROM FLASH LOCATION 0x8012000 . From hex, end of program location is around 0x80033A0
+	readSector(0x8012000, (void *)settings, LSIZE);
+	
+	//if(settings->server_address
 	
   while (1)
   {

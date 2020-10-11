@@ -6,6 +6,7 @@
 "solar2\main.o"
 "solar2\stm32f1xx_it.o"
 "solar2\stm32f1xx_hal_msp.o"
+"solar2\tm_onewire.o"
 "solar2\stm32f1xx_hal_gpio_ex.o"
 "solar2\stm32f1xx_hal_adc.o"
 "solar2\stm32f1xx_hal_adc_ex.o"
