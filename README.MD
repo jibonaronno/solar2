@@ -6,3 +6,5 @@ Collected data processed and displayed in the Dashboard.<br /><br />
 <img alt="NO IMAGE" src="rms.jpg"><br>
 Device deployed to hundreds of sites to collect Energy Generation Data.<br /><br />
 
+<img alt="NO IMAGE" src="pcb.png"><br>
+PCB with populated parts.<br /><br />
