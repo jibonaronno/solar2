@@ -3,6 +3,6 @@ This project is a Remote Monitoring System (RMS) for large quantity solar operat
 <img alt="NO IMAGE" src="dashboard.png"><br>
 Collected data processed and displayed in the Dashboard.<br /><br />
 
-<img alt="NO IMAGE" src="rms.png"><br>
+<img alt="NO IMAGE" src="rms.jpg"><br>
 Device deployed to hundreds of sites to collect Energy Generation Data.<br /><br />
 
