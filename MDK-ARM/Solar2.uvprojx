@@ -461,6 +461,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\tm_onewire.c</FilePath>
             </File>
+            <File>
+              <FileName>trex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\trex.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

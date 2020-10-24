@@ -36,3 +36,4 @@ solar2\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 solar2\main.o: ../Inc/atcommands.h
 solar2\main.o: ../Src/modbusmaster.h
 solar2\main.o: ../Src/tm_onewire.h
+solar2\main.o: ../Src/trex.h

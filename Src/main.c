@@ -29,6 +29,9 @@
 #include "atcommands.h"
 #include "modbusmaster.h"
 #include "tm_onewire.h"
+#include "trex.h"
+
+TRex *trex;
 
 extern atcmd_t atcmdtable[];
 extern MBUSPACDEF mbuspac[2];
@@ -208,7 +211,8 @@ PUTCHAR_PROTOTYPE
 #define OPMODE_MODEM			1
 #define OPMODE_MODBUS			2
 #define OPMODE_OUTBACK		3
-#define OPMODE_SENDSMS		4
+#define OPMODE_CHECKSMS		4
+#define OPMODE_PAUSE			8
 
 IWDG_HandleTypeDef   IwdgHandle;
 
@@ -221,6 +225,19 @@ int t_delay = 500;
 int tidx = 0;
 	
 SETTINGS *settings;
+
+void GenerateXor(SETTINGS *set)
+{
+	
+}
+
+/***********************************/
+/*		NO NEED THIS FUNCTION				*/
+/***********************************/
+void MemSet(void *str, size_t n)
+{
+	memset(str, 0, n);
+}
 
 /* USER CODE END 0 */
 
@@ -308,8 +325,23 @@ int main(void)
 	
 	/*--------------------------------------------------------------------------*/
 	//READ STORED DATA FROM FLASH LOCATION 0x8012000 . From hex, end of program location is around 0x80033A0
+	
 	readSector(0x8012000, (void *)settings, LSIZE);
 	
+	/*
+	trex = trex_compile("d{1,3}\\.d{1,3}\\.d{1,3}\\.d{1,3}");
+	
+	if(trex_match(trex, "10.55.203.91") == TRex_True)
+	{
+		huart = &huart1;
+		printf("REGEX MATCHED");
+	}
+	else
+	{
+		huart = &huart1;
+		printf("REGEX NOT MATCHED");
+	}
+	*/
 	//if(settings->server_address
 	
   while (1)
@@ -335,6 +367,10 @@ int main(void)
 			at_timeout_counter = 20000;
 			atcmd_idx = 0;
 		}
+		
+		/*****************************************************************************/
+		/*						MAIN STATE MACHINE START																			 */
+		/*****************************************************************************/
 		
 		if(flag_operation_mode == OPMODE_MODEM)
 		{
@@ -376,8 +412,15 @@ int main(void)
 								//sprintf(strGet01, "%s?serial=00000003332&imei=864713039870327&ccid=UDU2014072609&siteid=SITE00000009&devid=0x0000000C&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003333&imei=864369031283603&ccid=UDU2014072610&siteid=SITE00000010&devid=0x0000000D&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003334&imei=864764034451605&ccid=UDU2014072611&siteid=SITE00000011&devid=0x0000000E&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
-								sprintf(strGet01, "%s?serial=00000003335&imei=864713039889947&ccid=UDU2014072612&siteid=SITE00000012&devid=0x0000000F&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003335&imei=864713039889947&ccid=UDU2014072612&siteid=SITE00000012&devid=0x0000000F&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003326&imei=864764038322646&ccid=UDU2013072602&siteid=PTECH01&devid=0x00000006&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /rms/solarrms/gateway_bonni/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								
+								/****************************************************************************************/
+								/*							CLOUD @ 36.255.68.127/robi/pinlog.php						*/
+								sprintf(strGet01, "%s?serial=00000003332&imei=864713039870327&ccid=UDU2014072609&siteid=SITE00000009&devid=0x0000000C&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								
+								//sprintf(strGet01, "%s\r\n\r\n", "GET /robi/pinlog.php");
+								
 								lidx01 = strlen(strGet01);
 								strGet01[lidx01] = 0x1A;
 								lidx01++;
@@ -597,7 +640,19 @@ int main(void)
 					
 				}
 				/*****************************************************/
+		} // END OF OPMODE_MODBUS 
+		else if(flag_operation_mode == OPMODE_CHECKSMS)
+		{
+			
 		}
+		else if(flag_operation_mode == OPMODE_PAUSE)
+		{
+			
+		}
+		
+		/*****************************************************************************/
+		/*						MAIN STATE MACHINE END  																			 */
+		/*****************************************************************************/
 		
 		if(Outback_Rx_watchdog_counter == 0)
 		{
@@ -718,7 +773,6 @@ int main(void)
 		/*********************************************************/
 		
 		
-		
 		/****************************************************/
 		/* DATA CAME FROM OutBack														*/
 		/****************************************************/
@@ -772,11 +826,22 @@ int main(void)
 		
 		/*****************************************************/
 		
+		
+		/***********************************************************************************/
+		/*		UART1 External Serial Port. Received data redirected to UART4 before. 			 */
+		/***********************************************************************************/
 		if(flag_uart1_rx == 1)
 		{
 			flag_uart1_rx = 0;
-			huart = &huart4;
-			printf("%s", Rx1buff);
+			//huart = &huart4;
+			
+			if(strstr(Rx1buff, "PAUSE"))
+			{
+				flag_operation_mode = OPMODE_PAUSE;
+				huart = &huart1;
+				printf("-----------PAUSED-----------");
+			}
+			
 			rx1buffindex = 0;
 		}
 		

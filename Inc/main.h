@@ -76,6 +76,7 @@ typedef struct __SETTINGS
 {
 	char server_address[30];
 	char server_port[10];
+	uint32_t Xor;
 }SETTINGS;
 
 #define LSIZE	sizeof(SETTINGS)
