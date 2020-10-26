@@ -15,14 +15,14 @@ void GpioSetPinAsOutput(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
 	HAL_GPIO_Init(GPIOx, &ONEWIRE_GPIO_InitStruct);
 }
 
-int  writeSector(uint32_t Address,void * values, uint16_t size)
-{              
+int writeSector(uint32_t Address, void * values, uint16_t size)
+{
     uint16_t *AddressPtr;
     uint16_t *valuePtr;
     AddressPtr = (uint16_t *)Address;
     valuePtr=(uint16_t *)values;
     size = size / 2;  // incoming value is expressed in bytes, not 16 bit words
-    while(size) {        
+    while(size) {
         // unlock the flash 
         // Key 1 : 0x45670123
         // Key 2 : 0xCDEF89AB

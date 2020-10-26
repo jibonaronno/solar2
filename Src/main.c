@@ -34,6 +34,7 @@
 TRex *trex;
 
 extern atcmd_t atcmdtable[];
+extern atcmd_t atcmdsms[];
 extern MBUSPACDEF mbuspac[2];
 
 /* USER CODE END Includes */
@@ -239,6 +240,51 @@ void MemSet(void *str, size_t n)
 	memset(str, 0, n);
 }
 
+void StoreIp(char *str, char *addr)
+{
+	char *padle;
+	char *needle;
+	int lidx01 = 0;
+	//char buf01[150];
+	char *eptr;
+	char ip_1[10];
+	int ip1 = 0;
+	int ip2 = 0;
+	int ip3 = 0;
+	int ip4 = 0;
+	
+	char ipaddr[30];
+	
+	/*
+	strcpy(addr, str);
+	addr[3] = 0;
+	ip1 = strtol(addr, &eptr, 10);
+	addr[7] = 0;
+	ip2 = strtol(&addr[4], &eptr, 10);
+	addr[11] = 0;
+	ip3 = strtol(&addr[8], &eptr, 10);
+	addr[15] = 0;
+	ip4 = strtol(&addr[12], &eptr, 10);
+	sprintf(addr, "%d.%d.%d.%d", ip1, ip2, ip3, ip4);
+	*/
+	
+	eraseSector(0x8012000);
+	HAL_Delay(100);
+	writeSector(0x8012000, (void *)str, 17);
+	HAL_Delay(100);
+	
+	strcpy(addr, str);
+	addr[3] = 0;
+	ip1 = strtol(addr, &eptr, 10);
+	addr[7] = 0;
+	ip2 = strtol(&addr[4], &eptr, 10);
+	addr[11] = 0;
+	ip3 = strtol(&addr[8], &eptr, 10);
+	addr[15] = 0;
+	ip4 = strtol(&addr[12], &eptr, 10);
+	sprintf(addr, "%d.%d.%d.%d", ip1, ip2, ip3, ip4);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -248,12 +294,22 @@ void MemSet(void *str, size_t n)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	
+	char *padle;
 	char *needle;
 	int lidx01 = 0;
 	//char buf01[150];
+	char *eptr;
+	char ip_1[10];
+	int ip1 = 0;
+	int ip2 = 0;
+	int ip3 = 0;
+	int ip4 = 0;
 	
-	uint8_t flag_operation_mode = OPMODE_MODBUS;
+	char addr[30];
+	
+	char ipaddr[30];
+	
+	uint8_t flag_operation_mode = OPMODE_CHECKSMS; // OPMODE_MODBUS;
 
   /* USER CODE END 1 */
   
@@ -326,7 +382,46 @@ int main(void)
 	/*--------------------------------------------------------------------------*/
 	//READ STORED DATA FROM FLASH LOCATION 0x8012000 . From hex, end of program location is around 0x80033A0
 	
-	readSector(0x8012000, (void *)settings, LSIZE);
+	readSector(0x8012000, (void *)ipaddr, LSIZE);
+	
+	huart = &huart1;
+	printf("GETTING IP FROM FLASH -----------------------------\r\n\r\n");
+	
+	strncpy(ip_1, ipaddr, 3);
+	
+	ip1 = strtol(ip_1, &eptr, 10);
+	
+	printf("IP CONVERT -----------------------------\r\n\r\n");
+	
+	if((ip1 > 255) || (ip1 < 10))
+	{
+		eraseSector(0x8012000);
+		HAL_Delay(100);
+		strncpy((char *)ipaddr, "036.255.068.127", 15);
+		printf("strncpy -----------------------------\r\n\r\n");
+		writeSector(0x8012000, (void *)ipaddr, LSIZE);
+		HAL_Delay(100);
+	}
+	
+	huart = &huart1;
+	printf("GETTING IP-----------------------------\r\n\r\n");
+	
+	strcpy(addr, ipaddr);
+	addr[3] = 0;
+	ip1 = strtol(addr, &eptr, 10);
+	addr[7] = 0;
+	ip2 = strtol(&addr[4], &eptr, 10);
+	addr[11] = 0;
+	ip3 = strtol(&addr[8], &eptr, 10);
+	addr[15] = 0;
+	ip4 = strtol(&addr[12], &eptr, 10);
+	
+	sprintf(addr, "%d.%d.%d.%d", ip1, ip2, ip3, ip4);
+	
+	huart = &huart1;
+	printf("STORED IP : %s", addr);
+	
+	sprintf(atcmdtable[10].cmd, "AT+CIPSTART=\"TCP\",\"%s\",\"80\"\r\n", addr);
 	
 	/*
 	trex = trex_compile("d{1,3}\\.d{1,3}\\.d{1,3}\\.d{1,3}");
@@ -416,7 +511,7 @@ int main(void)
 								//sprintf(strGet01, "%s?serial=00000003326&imei=864764038322646&ccid=UDU2013072602&siteid=PTECH01&devid=0x00000006&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /rms/solarrms/gateway_bonni/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								
 								/****************************************************************************************/
-								/*							CLOUD @ 36.255.68.127/robi/pinlog.php						*/
+								/*							CLOUD @ 36.255.68.127/pinlog.php						*/
 								sprintf(strGet01, "%s?serial=00000003332&imei=864713039870327&ccid=UDU2014072609&siteid=SITE00000009&devid=0x0000000C&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								
 								//sprintf(strGet01, "%s\r\n\r\n", "GET /robi/pinlog.php");
@@ -460,7 +555,7 @@ int main(void)
 						}
 						flag_atcommand_responded = 0;
 						at_timeout_counter = atcmdtable[atcmd_idx].timeout * 1000;
-					}
+					} 
 					else
 					{
 						if(atcmd_idx > 9)
@@ -643,7 +738,26 @@ int main(void)
 		} // END OF OPMODE_MODBUS 
 		else if(flag_operation_mode == OPMODE_CHECKSMS)
 		{
-			
+			if(at_timeout_counter == 0)
+			{
+				if(atcmd_idx < 4)
+				{
+					atcmd_idx++;
+					
+					huart = &huart4;
+					printf("%s",atcmdsms[atcmd_idx].cmd);
+					
+					flag_atcommand_responded = 0;
+					at_timeout_counter = atcmdtable[atcmd_idx].timeout * 1000;
+				}
+				else
+				{
+					flag_atcommand_responded = 0;
+					at_timeout_counter = 20000;
+					atcmd_idx = -1;
+					flag_operation_mode = OPMODE_MODEM;
+				}
+			}
 		}
 		else if(flag_operation_mode == OPMODE_PAUSE)
 		{
@@ -683,6 +797,7 @@ int main(void)
 			
 			huart = &huart1;
 			printf("MODEM :: %s\r\n", Rx4buff);
+			
 			
 			if(strstr(atcmdtable[atcmd_idx].ret, "__EGO"))
 			{
@@ -757,6 +872,26 @@ int main(void)
 				{
 					huart = &huart1;
 					printf("RETURN :: %s\r\n", Rx4buff);
+					
+					/*********************************************************************/
+					/*  CHECK FOR IP SMS  */
+					if(strstr(Rx4buff, "+CMT:"))
+					{
+						if(strstr(Rx4buff, "ip"))
+						{
+							padle = strstr(Rx4buff, "ip");
+							padle[18] = 0;
+							huart = &huart1;
+							printf("IP ADDRESS : %s", &padle[3]);
+							StoreIp(&padle[3], addr);
+							
+							flag_atcommand_responded = 0;
+							at_timeout_counter = 20000;
+							atcmd_idx = 0;
+							Retry_Timeout_Counter = 0; //Initiate MODEM RESET
+						}
+					}
+					/*******************************************************************/
 					
 					if(strstr(Rx4buff, "CLOSED"))
 					{
