@@ -173,7 +173,7 @@ GPIO_TypeDef *Outback_PORT = GPIOC;
 uint16_t OutbackIdx = 0;
 volatile int flag_lock = 0;
 
-int Retry_Timeout_Counter = 280000;
+int Retry_Timeout_Counter = 480000;
 
 int obcounter = 0;
 
@@ -253,7 +253,7 @@ void StoreIp(char *str, char *addr)
 	int ip3 = 0;
 	int ip4 = 0;
 	
-	char ipaddr[30];
+	char ipaddr[100];
 	
 	/*
 	strcpy(addr, str);
@@ -307,7 +307,7 @@ int main(void)
 	
 	char addr[30];
 	
-	char ipaddr[30];
+	char ipaddr[100];
 	
 	uint8_t flag_operation_mode = OPMODE_CHECKSMS; // OPMODE_MODBUS;
 
@@ -397,7 +397,7 @@ int main(void)
 	{
 		eraseSector(0x8012000);
 		HAL_Delay(100);
-		strncpy((char *)ipaddr, "036.255.068.127", 15);
+		strncpy((char *)ipaddr, "036.255.068.224", 15);
 		printf("strncpy -----------------------------\r\n\r\n");
 		writeSector(0x8012000, (void *)ipaddr, LSIZE);
 		HAL_Delay(100);
@@ -421,6 +421,12 @@ int main(void)
 	huart = &huart1;
 	printf("STORED IP : %s", addr);
 	
+	/************************* PORT:8090 ************************/
+	/* PORT:8090 is the port of my personal server for http
+	 * This port has to be changed for other server
+	 *
+	 */
+	//sprintf(atcmdtable[10].cmd, "AT+CIPSTART=\"TCP\",\"%s\",\"8090\"\r\n", addr);
 	sprintf(atcmdtable[10].cmd, "AT+CIPSTART=\"TCP\",\"%s\",\"80\"\r\n", addr);
 	
 	/*
@@ -458,7 +464,7 @@ int main(void)
 			CONNECT_LED_OFF;
 			ONLINE_LED_OFF;
 			HAL_Delay(10000); //Watch Dog Reset
-			Retry_Timeout_Counter = 240000;
+			Retry_Timeout_Counter = 480000;
 			at_timeout_counter = 20000;
 			atcmd_idx = 0;
 		}
@@ -499,7 +505,12 @@ int main(void)
 								//sprintf(strGet01, "%s?serial=00000003322&imei=864713033803712&ccid=UDU2013072502&siteid=MYTRL18&devid=0x00000003&cellno=+8801608433197&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003324&imei=864764038322646&ccid=UDU2013072602&siteid=MYTRL12&devid=0x00000005&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003326&imei=864764038322646&ccid=UDU2013072602&siteid=PTECH01&devid=0x00000006&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								
+								/****************************************************************************************/
+								/*							LOCAL @ 103.110.113.54/gateway/pinlog.php																*/
+								/****************************************************************************************/
 								//sprintf(strGet01, "%s?serial=00000003327&imei=864764038322647&ccid=UDU2014072603&siteid=PTECH02&devid=0x00000007&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								
 								//sprintf(strGet01, "%s?serial=00000003328&imei=864713033806749&ccid=UDU2014072604&siteid=SITE00000005&devid=0x00000008&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003329&imei=864764039605221&ccid=UDU2014072605&siteid=SITE00000006&devid=0x00000009&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003330&imei=867858032270095&ccid=UDU2014072607&siteid=SITE00000007&devid=0x0000000A&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
@@ -511,8 +522,30 @@ int main(void)
 								//sprintf(strGet01, "%s?serial=00000003326&imei=864764038322646&ccid=UDU2013072602&siteid=PTECH01&devid=0x00000006&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /rms/solarrms/gateway_bonni/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								
 								/****************************************************************************************/
-								/*							CLOUD @ 36.255.68.127/pinlog.php						*/
-								sprintf(strGet01, "%s?serial=00000003332&imei=864713039870327&ccid=UDU2014072609&siteid=SITE00000009&devid=0x0000000C&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								/*							CLOUD @ 36.255.68.127/pinlog.php																				*/
+								/****************************************************************************************/
+								//sprintf(strGet01, "%s?serial=00000003332&imei=864713039870327&ccid=UDU2014072609&siteid=SITE00000009&devid=0x0000000C&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								
+								/****************************************************************************************/
+								/*							CLOUD @ 36.255.68.224/pinlog.php																				*/
+								/****************************************************************************************/
+								//sprintf(strGet01, "%s?serial=00000003322&imei=864713033803712&ccid=UDU2013072502&siteid=MYTRL18&devid=0x00000003&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003323&imei=864713033800000&ccid=UDU2013072503&siteid=MYTRL20&devid=0x00000004&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								sprintf(strGet01, "%s?serial=00000003321&imei=864713033800000&ccid=UDU2013072500&siteid=MYFLP25&devid=0x00000002&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								
+								//sprintf(strGet01, "%s?serial=00000003322&imei=864713033803712&ccid=UDU2013072502&siteid=MYTRL18&devid=0x00000003&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003324&imei=864764038322646&ccid=UDU2013072602&siteid=MYTRL12&devid=0x00000005&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003326&imei=864764038322646&ccid=UDU2013072602&siteid=PTECH01&devid=0x00000006&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003327&imei=864764038322647&ccid=UDU2014072603&siteid=PTECH02&devid=0x00000007&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003328&imei=864713033806749&ccid=UDU2014072604&siteid=SITE00000005&devid=0x00000008&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003329&imei=864764039605221&ccid=UDU2014072605&siteid=SITE00000006&devid=0x00000009&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003330&imei=867858032270095&ccid=UDU2014072607&siteid=SITE00000007&devid=0x0000000A&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003331&imei=864764034145660&ccid=UDU2014072608&siteid=SITE00000008&devid=0x0000000B&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=000000033333&imei=864369031283603&ccid=UDU2014072610&siteid=SITE00000010&devid=0x0000000D&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003334&imei=864764034451605&ccid=UDU2014072611&siteid=SITE00000011&devid=0x0000000E&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=0000032&imei=864713039870327&ccid=UDU2014072609&siteid=SITE00000009&devid=0x0000000C&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003003335&imei=864713039889947&ccid=UDU2014072612&siteid=SITE00000012&devid=0x0000000F&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003326&imei=864764038322646&ccid=UDU2013072602&siteid=PTECH01&devid=0x00000006&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /rms/solarrms/gateway_bonni/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								
 								//sprintf(strGet01, "%s\r\n\r\n", "GET /robi/pinlog.php");
 								

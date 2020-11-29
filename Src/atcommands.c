@@ -31,7 +31,6 @@ atcmd_t atcmdsms[] = {
 	{"AT+CNMI=1,2,0,0,0\r\n", "OK", 5}
 };
 
-/*
 atcmd_t atcmdtable[] = {
 	{"AT\r\n", "OK", 5},
 	{"ATE0\r\n", "OK", 5},
@@ -50,8 +49,9 @@ atcmd_t atcmdtable[] = {
 	{"^Z", "SEND OK", 20},
 	{"", "CLOSED", 20}
 };
-*/
 
+
+/*
 atcmd_t atcmdtable[] = {
 	{"AT\r\n", "OK", 5},
 	{"ATE0\r\n", "OK", 5},
@@ -71,3 +71,4 @@ atcmd_t atcmdtable[] = {
 	{"^Z", "SEND OK", 20},
 	{"", "CLOSED", 20}
 };
+*/

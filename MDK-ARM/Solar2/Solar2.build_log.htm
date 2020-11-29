@@ -27,10 +27,6 @@ Project File Date:  10/15/2020
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC_505u2\Bin'
 Build target 'Solar2'
-compiling atcommands.c...
-../Inc/atcommands.h(11): warning:  #1295-D: Deprecated declaration atcommandSendList - give arg types
-  void atcommandSendList();
-..\Src\atcommands.c: 1 warning, 0 errors
 compiling main.c...
 ../Inc/atcommands.h(11): warning:  #1295-D: Deprecated declaration atcommandSendList - give arg types
   void atcommandSendList();
@@ -45,16 +41,16 @@ compiling main.c...
 ../Src/main.c(250): warning:  #177-D: variable "ip_1" was declared but never referenced
   	char ip_1[10];
 ../Src/main.c(256): warning:  #177-D: variable "ipaddr" was declared but never referenced
-  	char ipaddr[30];
-../Src/main.c(1119): warning:  #177-D: function "MX_TIM2_Init" was declared but never referenced
+  	char ipaddr[100];
+../Src/main.c(1152): warning:  #177-D: function "MX_TIM2_Init" was declared but never referenced
   static void MX_TIM2_Init(void)
-../Src/main.c(1091): warning:  #177-D: function "MX_IWDG_Init" was declared but never referenced
+../Src/main.c(1124): warning:  #177-D: function "MX_IWDG_Init" was declared but never referenced
   static void MX_IWDG_Init(void)
 ../Src/main.c: 9 warnings, 0 errors
 linking...
-Program Size: Code=13064 RO-data=1236 RW-data=3164 ZI-data=3252  
+Program Size: Code=13064 RO-data=1232 RW-data=3164 ZI-data=3252  
 FromELF: creating hex file...
-"Solar2\Solar2.axf" - 0 Error(s), 10 Warning(s).
+"Solar2\Solar2.axf" - 0 Error(s), 9 Warning(s).
 
 <h2>Software Packages used:</h2>
 
