@@ -531,7 +531,10 @@ int main(void)
 								/****************************************************************************************/
 								//sprintf(strGet01, "%s?serial=00000003322&imei=864713033803712&ccid=UDU2013072502&siteid=MYTRL18&devid=0x00000003&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003323&imei=864713033800000&ccid=UDU2013072503&siteid=MYTRL20&devid=0x00000004&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
-								sprintf(strGet01, "%s?serial=00000003321&imei=864713033800000&ccid=UDU2013072500&siteid=MYFLP25&devid=0x00000002&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003321&imei=864713033800000&ccid=UDU2013072500&siteid=MYFLP25&devid=0x00000002&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003326&imei=864713033000000&ccid=UDU2013072000&siteid=PTECH02&devid=0x00000007&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								//sprintf(strGet01, "%s?serial=00000003328&imei=800013000000008&ccid=UDU0000000008&siteid=PTECH03&devid=0x00000008&cellno=+8800000000008&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+								sprintf(strGet01, "%s?serial=00000003329&imei=800013000000009&ccid=UDU0000000009&siteid=PTECH04&devid=0x00000009&cellno=+8800000000009&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								
 								//sprintf(strGet01, "%s?serial=00000003322&imei=864713033803712&ccid=UDU2013072502&siteid=MYTRL18&devid=0x00000003&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003324&imei=864764038322646&ccid=UDU2013072602&siteid=MYTRL12&devid=0x00000005&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
@@ -788,7 +791,7 @@ int main(void)
 					flag_atcommand_responded = 0;
 					at_timeout_counter = 20000;
 					atcmd_idx = -1;
-					flag_operation_mode = OPMODE_MODEM;
+					flag_operation_mode = OPMODE_MODBUS;
 				}
 			}
 		}
@@ -951,7 +954,7 @@ int main(void)
 			if(rx5buffindex > 13)
 			{
 				
-				Outback_Rx_watchdog_counter = 10000;
+				Outback_Rx_watchdog_counter = 30000;
 				
 				if(OutbackIdx == 0)
 				{
@@ -979,12 +982,15 @@ int main(void)
 				}
 			}
 			
+			//Charge controller 
 			obcounter++;
-			if(obcounter > 5)
+			if(obcounter > LOG_SOLAR_DELAY)
 			{
 				obcounter = 0;
+				#if defined LOG_SOLAR_CHARGER
 				huart = &huart1;
 				printf("IN1::%d OUT1::%d CURR1::%d KWh1::%d IN2:%d OUT2:%d CURR2:%d Kwh2:%d IN3:%d OUT3:%d CURR3:%d Kwh3:%d\r\n", dcinob, dcoutob, dccurrentob, dckwhout, dcinob1, dcoutob1, dccurrentob1, dckwhout1, dcinob2, dcoutob2, dccurrentob2, dckwhout2);
+				#endif
 			}
 			//HAL_UART_Transmit(&huart1, (uint8_t *)Rx5buff, rx5buffindex, 0x0fff);
 			//huart = &huart1;

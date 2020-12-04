@@ -60,6 +60,9 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
 
+#define LOG_SOLAR_CHARGER
+#define LOG_SOLAR_DELAY			0
+
 typedef struct __PULSE_STATE
 {
 	int count;
