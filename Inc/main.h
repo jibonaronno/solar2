@@ -60,8 +60,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
 
-#define LOG_SOLAR_CHARGER
-#define LOG_SOLAR_DELAY			0
+#define LOG_SOLAR_CHARGER			//Comment this definition to disable priniting data from OutBack Charge Controller.
+#define LOG_SOLAR_DELAY			0 //A non precise counter that the printing could happen
 
 typedef struct __PULSE_STATE
 {
