@@ -60,6 +60,13 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
 
+
+
+
+/*******************************************************************************/
+/*************  					User Defined Configurations								************/
+/******************************************************************************/
+
 #define LOG_SOLAR_CHARGER			//Comment this definition to disable priniting data from OutBack Charge Controller.
 #define LOG_SOLAR_DELAY			0 //A non precise counter that the printing could happen
 
