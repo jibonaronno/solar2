@@ -28,7 +28,8 @@ atcmd_t atcmdsms[] = {
 	{"AT\r\n", "OK", 5},
 	{"ATE1\r\n", "OK", 5},
 	{"AT+CMGF=1\r\n", "OK", 5},
-	{"AT+CNMI=1,2,0,0,0\r\n", "OK", 5}
+	{"AT+CNMI=1,2,0,0,0\r\n", "OK", 5},
+	{"AT+CGSN\r\n", "", 5}
 };
 
 atcmd_t atcmdtable[] = {

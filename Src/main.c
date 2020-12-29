@@ -76,6 +76,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+char imei[] = "864764030117291";
+
 uint8_t flash[2048];
 
 UART_HandleTypeDef *huart;
@@ -780,7 +782,7 @@ int main(void)
 		{
 			if(at_timeout_counter == 0)
 			{
-				if(atcmd_idx < 4)
+				if(atcmd_idx < 5)
 				{
 					atcmd_idx++;
 					
@@ -838,8 +840,27 @@ int main(void)
 			huart = &huart1;
 			printf("MODEM :: %s\r\n", Rx4buff);
 			
-			
-			if(strstr(atcmdtable[atcmd_idx].ret, "__EGO"))
+			if(flag_operation_mode == OPMODE_CHECKSMS)
+			{
+				if(strstr(atcmdsms[atcmd_idx].cmd, "CGSN"))
+				{
+					if(strlen(Rx4buff) > 10)
+					{
+						if(strstr(Rx4buff, imei))
+						{
+							huart = &huart1;
+							printf("IMEI OKAY\r\n");
+						}
+						else
+						{
+							huart = &huart1;
+							printf("IMEI WRONG\r\nPROGRAM LOCKED\r\n");
+							//while(1);
+						}
+					}
+				}
+			}
+			else if(strstr(atcmdtable[atcmd_idx].ret, "__EGO"))
 			{
 				flag_ego = 1;
 			}
