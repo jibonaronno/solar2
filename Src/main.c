@@ -76,7 +76,54 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
-char imei[] = "864764030117291";
+char imei[45][16] = {{"               "},
+												{"865210037891727"},
+												{"865691031797467"},
+												{"864764033753985"},
+												{"864764032809150"},
+												{"863584033615427"}, //
+												{"865691034902353"}, //
+												{"865210038750047"}, //
+												{"865210037391322"}, //
+												{"862643037656844"}, //
+												{"863584030025513"}, //
+												{"865674039070632"}, //
+												{"864369039981455"}, //
+												{"867856030223629"}, //
+												{"864369034785109"}, //
+												{"863584030234156"}, //
+												{"864764035252218"},
+												{"864764038362741"},
+												{"864764031688308"},
+												{"867856030223629"}, //867856030223629 
+												{"863584030585714"},
+												{"861445033875902"}};
+
+char devids[45][11] = {{"          "},
+											 {"0x0000000A"},
+											 {"0x0000000B"},
+											 {"0x0000000C"},
+											 {"0x0000000D"},
+											 {"0x0000000E"},
+											 {"0x0000000F"},
+											 {"0x00000010"},
+											 {"0x00000011"},
+											 {"0x00000012"},
+											 {"0x00000013"},
+											 {"0x00000014"},
+											 {"0x00000015"},
+											 {"0x00000016"},
+											 {"0x00000017"},
+											 {"0x00000018"},
+											 {"0x00000019"},
+											 {"0x0000001A"},
+											 {"0x0000001B"},
+											 {"0x0000001C"},
+											 {"0x0000001D"},
+											 {"0x0000001E"}
+											 };
+
+uint32_t imei_idx = 21;
 
 uint8_t flash[2048];
 
@@ -540,7 +587,25 @@ int main(void)
 								//sprintf(strGet01, "%s?serial=00000003321&imei=864713033800000&ccid=UDU2013072500&siteid=MYFLP25&devid=0x00000002&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003326&imei=864713033000000&ccid=UDU2013072000&siteid=PTECH02&devid=0x00000007&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003328&imei=800013000000008&ccid=UDU0000000008&siteid=PTECH03&devid=0x00000008&cellno=+8800000000008&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
-								sprintf(strGet01, "%s?serial=00000003329&imei=800013000000009&ccid=UDU0000000009&siteid=PTECH04&devid=0x00000009&cellno=+8800000000009&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
+sprintf(strGet01, "%s?serial=00000003329&imei=%s&\
+ccid=UDU0000000009&siteid=PTECH04&\
+devid=%s&cellno=+8800000000009&\
+dccurrentob=%d&dckwhout=%d&\
+dcinob=%d&dcoutob=%d&\
+dccurrentob1=%d&dckwhout1=%d&\
+dcinob1=%d&dcoutob1=%d&\
+dccurrentob2=%d&dckwhout2=%d&\
+dcinob2=%d&dcoutob2=%d&\
+ackwhsun=%d&inpower=%d&\
+alarm1=%d&alarm2=%d&\
+alarm3=%d&pv1volt=%d&\
+pv2volt=%d&avolt=%d&\
+bvolt=%d&cvolt=%d&\
+acur=%d&bcur=%d&\
+ccur=%d\r\n\r\n",\
+"GET /pinlog.php",(const char *)imei[imei_idx], (const char *)devids[imei_idx], dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1,\
+dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt,\
+avolt, bvolt, cvolt, acur, bcur, ccur);
 								
 								//sprintf(strGet01, "%s?serial=00000003322&imei=864713033803712&ccid=UDU2013072502&siteid=MYTRL18&devid=0x00000003&cellno=+8800000000000&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
 								//sprintf(strGet01, "%s?serial=00000003324&imei=864764038322646&ccid=UDU2013072602&siteid=MYTRL12&devid=0x00000005&cellno=+8801825327740&dccurrentob=%d&dckwhout=%d&dcinob=%d&dcoutob=%d&dccurrentob1=%d&dckwhout1=%d&dcinob1=%d&dcoutob1=%d&dccurrentob2=%d&dckwhout2=%d&dcinob2=%d&dcoutob2=%d&ackwhsun=%d&inpower=%d&alarm1=%d&alarm2=%d&alarm3=%d&pv1volt=%d&pv2volt=%d&avolt=%d&bvolt=%d&cvolt=%d&acur=%d&bcur=%d&ccur=%d\r\n", "GET /gateway/pinlog.php", dccurrentob, dckwhout, dcinob, dcoutob, dccurrentob1, dckwhout1, dcinob1, dcoutob1, dccurrentob2, dckwhout2, dcinob2, dcoutob2, ackwhsun, inpower, alarm1, alarm2, alarm3, pv1volt, pv2volt, avolt, bvolt, cvolt, acur, bcur, ccur);
@@ -656,7 +721,9 @@ int main(void)
 				HAL_UART_Transmit_IT(&huart2, (uint8_t *)mbuspac[mbus_index].txdata, 8);
 				HAL_Delay(200);
 				huart = &huart1;
-				printf("%d :: %02X %02X %02X %02X %02X %02X %02X %02X\r\n", mbus_index, mbuspac[mbus_index].txdata[0], mbuspac[mbus_index].txdata[1], mbuspac[mbus_index].txdata[2], mbuspac[mbus_index].txdata[3], mbuspac[mbus_index].txdata[4], mbuspac[mbus_index].txdata[5], mbuspac[mbus_index].txdata[6], mbuspac[mbus_index].txdata[7]);
+				printf("%d :: %02X %02X %02X %02X %02X %02X %02X %02X\r\n", mbus_index, mbuspac[mbus_index].txdata[0],\
+				mbuspac[mbus_index].txdata[1], mbuspac[mbus_index].txdata[2], mbuspac[mbus_index].txdata[3], mbuspac[mbus_index].txdata[4],\
+				mbuspac[mbus_index].txdata[5], mbuspac[mbus_index].txdata[6], mbuspac[mbus_index].txdata[7]);
 				
 				//HAL_UART_Transmit_IT(&huart1, (uint8_t *)mbuspac[mbus_index].txdata, 8);
 				//HAL_UART_Transmit_IT(&huart1, (uint8_t *)"\r\n", 1);
@@ -846,7 +913,7 @@ int main(void)
 				{
 					if(strlen(Rx4buff) > 10)
 					{
-						if(strstr(Rx4buff, imei))
+						if(strstr(Rx4buff, (const char *)imei[imei_idx]))
 						{
 							huart = &huart1;
 							printf("IMEI OKAY\r\n");
@@ -854,8 +921,8 @@ int main(void)
 						else
 						{
 							huart = &huart1;
-							printf("IMEI WRONG\r\nPROGRAM LOCKED\r\n");
-							//while(1);
+							printf("IMEI WRONG %s \r\nPROGRAM LOCKED\r\n", (const char *)Rx4buff);
+							while(1);
 						}
 					}
 				}
